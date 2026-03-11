@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#29156e" />
+  <title>Admin — Seal Services</title>
+  <link rel="stylesheet" href="sosati-style.css" />
+  <style>
+    /* ── LOGIN SCREEN ─────────────────────────────────────── */
+    #login-screen {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--brand-dark) 0%, var(--brand) 50%, var(--brand-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .login-logo {
+      width: 70px; height: 70px;
+      background: var(--brand);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 30px;
+      color: var(--white);
+      font-weight: 700;
+      margin: 0 auto 20px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .login-card h2 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+
+    .login-card p {
+      font-size: 13px;
+      color: var(--gray-400);
+      margin-bottom: 28px;
+    }
+
+    .login-error {
+      background: #fee2e2;
+      color: #dc2626;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* ── ADMIN SCREEN ──────────────────────────────────────── */
+    #admin-screen { display: none; }
+
+    .admin-header {
+      background: var(--brand);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(41,21,110,0.3);
+    }
+
+    .admin-header-left { display: flex; align-items: center; gap: 12px; }
+    .admin-logo {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 18px; font-weight: 700;
+      color: var(--white);
+    }
+    .admin-header-title { font-size: 15px; color: var(--white); font-weight: 600; }
+    .admin-header-sub   { font-size: 11px; color: rgba(255,255,255,0.65); }
+
+    .logout-btn {
+      background: rgba(255,255,255,0.15);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: var(--radius-full);
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font-body);
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── STATS BAR ──────────────────────────────────────────── */
+    .stats-bar {
+      background: var(--white);
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      border-bottom: 1px solid var(--gray-100);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 8px 4px;
+    }
+
+    .stat-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--brand);
+      font-family: var(--font-display);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 3px;
+    }
+
+    /* ── FILTERS ────────────────────────────────────────────── */
+    .filters-bar {
+      background: var(--white);
+      padding: 14px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid var(--gray-100);
+      flex-wrap: wrap;
+      position: sticky;
+      top: 64px;
+      z-index: 90;
+    }
+
+    .filter-select {
+      flex: 1;
+      min-width: 130px;
+      padding: 9px 32px 9px 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--gray-800);
+      background: var(--white);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2329156e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      -webkit-appearance: none;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .filter-select:focus { border-color: var(--brand); }
+
+    .date-filter {
+      padding: 9px 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--gray-800);
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+    }
+
+    .date-filter:focus { border-color: var(--brand); }
+
+    .refresh-btn {
+      background: var(--brand-soft);
+      color: var(--brand);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 9px 14px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: var(--transition);
+      line-height: 1;
+    }
+    .refresh-btn:hover { background: var(--brand); color: var(--white); }
+
+    /* ── APPOINTMENTS LIST ──────────────────────────────────── */
+    .appts-container {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Override appt-card for admin */
+    .appt-card { cursor: default; }
+
+    .appt-phone-link {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .appt-notes-text {
+      font-size: 12px;
+      color: var(--gray-600);
+      background: var(--gray-50);
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--brand-soft);
+      margin-top: 4px;
+    }
+
+    /* ── LIVE DOT ─────────────────────────────────────────── */
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .live-dot {
+      width: 8px; height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* ── NEW CITA FLASH ──────────────────────────────────────── */
+    @keyframes newCitaFlash {
+      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); }
+      70%  { box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+
+    .appt-card.new-flash {
+      animation: newCitaFlash 1s ease 3, fadeUp 0.3s ease;
+      border-color: var(--success) !important;
+    }
+
+    /* ── MODAL CONFIRM ──────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-box {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: fadeUp 0.3s ease;
+    }
+
+    .modal-title { font-family: var(--font-display); font-size: 18px; color: var(--brand); margin-bottom: 8px; }
+    .modal-text  { font-size: 14px; color: var(--gray-600); margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">S</div>
+    <h2>Seal Services</h2>
+    <p>Panel de administración — SOSATI</p>
+
+    <div class="form-group" id="fg-pass">
+      <label class="form-label" for="inp-pass">Contraseña de acceso</label>
+      <input class="form-input" type="password" id="inp-pass"
+        placeholder="••••••••"
+        onkeydown="if(event.key==='Enter') doLogin()" />
+      <div class="form-error">Contraseña incorrecta. Intenta de nuevo.</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="doLogin()">
+      Entrar al panel →
+    </button>
+
+    <p style="font-size:11.5px;color:var(--gray-400);margin-top:16px">
+      🔒 Acceso restringido al personal de Seal Services
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ADMIN SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="admin-screen">
+
+  <!-- ADMIN HEADER -->
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <div class="admin-logo">S</div>
+      <div>
+        <div class="admin-header-title">Seal Services · Admin</div>
+        <div class="admin-header-sub">
+          <span class="live-indicator">
+            <span class="live-dot"></span>En vivo
+          </span>
+        </div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Salir</button>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div>
+      <div class="stat-label">Pendientes</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-confirmed" style="color:var(--success)">0</div>
+      <div class="stat-label">Confirmadas</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-today" style="color:var(--info)">0</div>
+      <div class="stat-label">Hoy</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-bar">
+    <input type="date" class="date-filter" id="filter-date" onchange="renderList()" />
+    <select class="filter-select" id="filter-status" onchange="renderList()">
+      <option value="">Todos los estados</option>
+      <option value="pending">Pendientes</option>
+      <option value="confirmed">Confirmadas</option>
+      <option value="completed">Completadas</option>
+      <option value="cancelled">Canceladas</option>
+    </select>
+    <select class="filter-select" id="filter-location" onchange="renderList()">
+      <option value="">Todas las oficinas</option>
+    </select>
+    <button class="refresh-btn" onclick="renderAll()" title="Actualizar">🔄</button>
+  </div>
+
+  <!-- APPOINTMENTS LIST -->
+  <div class="appts-container" id="appts-list">
+    <!-- generado por JS -->
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div id="modal" style="display:none" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">¿Confirmar acción?</div>
+    <div class="modal-text"  id="modal-text">Esta acción no se puede deshacer.</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" style="flex:1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" id="modal-confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="sosati-toast"></div>
+
+<script src="sosati-core.js"></script>
+<script>
+
+// ══════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════
+function doLogin() {
+  const pass = document.getElementById("inp-pass").value;
+  if (SOSATI.auth.login(pass)) {
+    document.getElementById("login-screen").style.display  = "none";
+    document.getElementById("admin-screen").style.display  = "block";
+    initAdmin();
+  } else {
+    document.getElementById("fg-pass").classList.add("has-error");
+    document.getElementById("inp-pass").value = "";
+    document.getElementById("inp-pass").focus();
+  }
+}
+
+function doLogout() {
+  SOSATI.auth.logout();
+  location.reload();
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+function initAdmin() {
+  // Si ya estaba logueado, saltar login
+  buildLocationFilter();
+  setDefaultDate();
+  renderAll();
+
+  // BroadcastChannel — recibir nuevas citas en tiempo real
+  SOSATI.initBroadcast((msg) => {
+    if (msg.type === "NEW_APPOINTMENT") {
+      renderAll();
+      showToast(`🆕 Nueva cita: ${msg.appointment.name}`, "success");
+      // Flash de nueva cita
+      setTimeout(() => {
+        const card = document.querySelector(`[data-id="${msg.appointment.id}"]`);
+        if (card) {
+          card.classList.add("new-flash");
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 200);
+    }
+    if (msg.type === "STATUS_UPDATE" || msg.type === "DELETED") {
+      renderAll();
+    }
+  });
+}
+
+// Verificar sesión al cargar
+document.addEventListener("DOMContentLoaded", () => {
+  if (SOSATI.auth.isLoggedIn()) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-screen").style.display = "block";
+    initAdmin();
+  }
+});
+
+// ══════════════════════════════════════════════════════
+// FILTERS
+// ══════════════════════════════════════════════════════
+function buildLocationFilter() {
+  const sel = document.getElementById("filter-location");
+  SOSATI.config.locations.forEach(l => {
+    const opt = document.createElement("option");
+    opt.value = l.id;
+    opt.textContent = l.label.split("—")[0].trim();
+    sel.appendChild(opt);
+  });
+}
+
+function setDefaultDate() {
+  document.getElementById("filter-date").value = SOSATI.utils.todayStr();
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+function renderAll() {
+  updateStats();
+  renderList();
+}
+
+function updateStats() {
+  const all     = SOSATI.storage.getAll();
+  const today   = SOSATI.utils.todayStr();
+  const pending = all.filter(a => a.status === "pending").length;
+  const confirmed = all.filter(a => a.status === "confirmed").length;
+  const todayCount = all.filter(a => a.date === today).length;
+
+  document.getElementById("stat-total").textContent    = all.length;
+  document.getElementById("stat-pending").textContent  = pending;
+  document.getElementById("stat-confirmed").textContent = confirmed;
+  document.getElementById("stat-today").textContent    = todayCount;
+}
+
+function renderList() {
+  let appts = SOSATI.storage.getAll();
+
+  const dateF   = document.getElementById("filter-date").value;
+  const statusF = document.getElementById("filter-status").value;
+  const locF    = document.getElementById("filter-location").value;
+
+  if (dateF)   appts = appts.filter(a => a.date === dateF);
+  if (statusF) appts = appts.filter(a => a.status === statusF);
+  if (locF)    appts = appts.filter(a => a.location === locF);
+
+  // Ordenar por fecha + hora
+  appts.sort((a, b) => {
+    const da = a.date + " " + a.time;
+    const db = b.date + " " + b.time;
+    return da > db ? 1 : -1;
+  });
+
+  const container = document.getElementById("appts-list");
+
+  if (appts.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>No hay citas para mostrar con los filtros seleccionados.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = appts.map(a => buildCard(a)).join("");
+}
+
+function buildCard(a) {
+  const status = SOSATI.utils.statusLabel(a.status);
+  const serviceObj = SOSATI.config.services.find(s => s.id === a.service);
+  const svcIcon = serviceObj?.icon || "🛠️";
+
+  const notesHTML = a.notes
+    ? `<div class="appt-notes-text">📝 ${a.notes}</div>`
+    : "";
+
+  return `
+    <div class="appt-card" data-id="${a.id}">
+      <div class="appt-card-header">
+        <div>
+          <div class="appt-name">${a.name}</div>
+          <div class="appt-id">${a.id}</div>
+        </div>
+        <span class="badge badge-${a.status}">${status.text}</span>
+      </div>
+
+      <div class="appt-meta">
+        <span class="appt-chip">📅 ${SOSATI.utils.formatDate(a.date)}</span>
+        <span class="appt-chip">🕐 ${a.time}</span>
+        <span class="appt-chip">${svcIcon} ${a.serviceLabel}</span>
+        <span class="appt-chip">📍 ${a.location === "belmont" ? "Belmont" : a.location === "ventura" ? "Ventura" : "Kings Canyon"}</span>
+      </div>
+
+      <div class="appt-meta" style="margin-top:-2px">
+        <span class="appt-chip">
+          📞 <a href="tel:${a.phone.replace(/\D/g,'')}" class="appt-phone-link">${a.phone}</a>
+        </span>
+        ${a.email ? `<span class="appt-chip">✉️ ${a.email}</span>` : ""}
+      </div>
+
+      ${notesHTML}
+
+      <div class="appt-actions">
+        ${a.status === "pending" ? `
+          <button class="btn btn-primary btn-sm" onclick="changeStatus('${a.id}','confirmed')">
+            ✅ Confirmar
+          </button>
+        ` : ""}
+        ${a.status === "confirmed" ? `
+          <button class="btn btn-primary btn-sm" onclick="changeStatus('${a.id}','completed')">
+            ✔️ Completada
+          </button>
+        ` : ""}
+        ${(a.status === "pending" || a.status === "confirmed") ? `
+          <button class="btn btn-secondary btn-sm" onclick="cancelAppt('${a.id}','${a.name}')">
+            ✕ Cancelar
+          </button>
+        ` : ""}
+        ${a.status === "cancelled" || a.status === "completed" ? `
+          <button class="btn btn-sm" style="background:var(--gray-100);color:var(--gray-600)" onclick="deleteAppt('${a.id}','${a.name}')">
+            🗑 Eliminar
+          </button>
+        ` : ""}
+        <button class="btn btn-sm btn-outline" onclick="callClient('${a.phone}')">
+          📞 Llamar
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════════════
+function changeStatus(id, status) {
+  SOSATI.storage.updateStatus(id, status);
+  renderAll();
+  const labels = { confirmed: "Cita confirmada ✅", completed: "Marcada como completada ✔️" };
+  showToast(labels[status] || "Estado actualizado", "success");
+}
+
+function cancelAppt(id, name) {
+  openModal(
+    "¿Cancelar cita?",
+    `Se marcará la cita de <strong>${name}</strong> como cancelada.`,
+    () => {
+      SOSATI.storage.updateStatus(id, "cancelled");
+      renderAll();
+      showToast("Cita cancelada", "error");
+    }
+  );
+}
+
+function deleteAppt(id, name) {
+  openModal(
+    "¿Eliminar cita?",
+    `Se eliminará permanentemente la cita de <strong>${name}</strong>. Esta acción no se puede deshacer.`,
+    () => {
+      SOSATI.storage.delete(id);
+      renderAll();
+      showToast("Cita eliminada", "info");
+    }
+  );
+}
+
+function callClient(phone) {
+  window.location.href = "tel:" + phone.replace(/\D/g, "");
+}
+
+// ══════════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════════
+let _modalCallback = null;
+
+function openModal(title, text, callback) {
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-text").innerHTML    = text;
+  _modalCallback = callback;
+  document.getElementById("modal").style.display = "flex";
+  document.getElementById("modal-confirm-btn").onclick = () => {
+    closeModal();
+    if (_modalCallback) _modalCallback();
+  };
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  _modalCallback = null;
+}
+
+// Cerrar modal al click fuera
+document.getElementById("modal").addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ══════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════
+function showToast(msg, type = "info") {
+  const t = document.getElementById("sosati-toast");
+  t.textContent = msg;
+  t.className   = `show ${type}`;
+  setTimeout(() => { t.className = ""; }, 3500);
+}
+</script>
+</body>
+</html>

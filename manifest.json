@@ -1,0 +1,22 @@
+{
+  "name": "Seal Services — Citas",
+  "short_name": "SOSATI",
+  "description": "Sistema de citas de Seal Services Inc.",
+  "start_url": "/sosati-appointment.html",
+  "display": "standalone",
+  "background_color": "#29156e",
+  "theme_color": "#29156e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
