@@ -594,6 +594,9 @@ function buildCard(a) {
         <button class="btn btn-sm btn-outline" onclick="callClient('${a.phone}')">
           📞 Llamar
         </button>
+        <button class="btn btn-sm" style="background:var(--brand-soft);color:var(--brand);border:1.5px solid var(--brand)" onclick="viewDocs('${a.id}','${a.name}')">
+          📎 Documentos
+        </button>
       </div>
     </div>
   `;
@@ -675,6 +678,98 @@ function showToast(msg, type = "info") {
   t.className   = `show ${type}`;
   setTimeout(() => { t.className = ""; }, 3500);
 }
+</script>
+
+<!-- DOCS MODAL -->
+<div id="docs-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.85);padding:20px;overflow-y:auto">
+  <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden">
+    <div style="background:var(--brand);padding:18px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="color:#fff;font-weight:700;font-size:16px" id="docs-modal-title">Documentos</div>
+        <div style="color:rgba(255,255,255,0.7);font-size:12px" id="docs-modal-id"></div>
+      </div>
+      <button onclick="closeDocsModal()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px">✕ Cerrar</button>
+    </div>
+    <div style="padding:20px">
+      <div id="docs-modal-body" style="min-height:100px;text-align:center;color:var(--gray-400)">
+        Cargando documentos...
+      </div>
+      <div style="margin-top:16px;text-align:right">
+        <button onclick="printDocs()" style="background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">🖨️ Imprimir todo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentDocs = [];
+
+async function viewDocs(apptId, clientName) {
+  document.getElementById('docs-modal-title').textContent = '📎 Documentos — ' + clientName;
+  document.getElementById('docs-modal-id').textContent = apptId;
+  document.getElementById('docs-modal-body').innerHTML = '<div style="padding:20px">Cargando...</div>';
+  document.getElementById('docs-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const res = await fetch('/api/documents/' + apptId);
+    const data = await res.json();
+    currentDocs = data.documents || [];
+
+    if (!currentDocs.length) {
+      document.getElementById('docs-modal-body').innerHTML =
+        '<div style="padding:30px;color:var(--gray-400)">📂 No hay documentos subidos para esta cita.</div>';
+      return;
+    }
+
+    const html = currentDocs.map(function(doc, i) {
+      var isImg = /\.(jpg|jpeg|png|webp)$/i.test(doc.url);
+      var kb = Math.round(doc.size / 1024);
+      if (isImg) {
+        return '<div style="margin-bottom:16px;border:1px solid #eee;border-radius:12px;overflow:hidden">' +
+          '<img src="' + doc.url + '" style="width:100%;display:block;cursor:pointer" onclick="window.open(\'' + doc.url + '\',\'_blank\')" />' +
+          '<div style="padding:8px 12px;background:#f9f9f9;display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="font-size:12px;color:#666">🖼️ Imagen · ' + kb + ' KB</span>' +
+          '<a href="' + doc.url + '" target="_blank" style="font-size:12px;color:var(--brand);font-weight:600">Ver original ↗</a>' +
+          '</div></div>';
+      } else {
+        return '<div style="margin-bottom:12px;padding:14px;border:1px solid #eee;border-radius:10px;display:flex;align-items:center;gap:12px">' +
+          '<span style="font-size:28px">📄</span>' +
+          '<div style="flex:1"><div style="font-weight:600;font-size:14px">Documento PDF</div>' +
+          '<div style="font-size:12px;color:#999">' + kb + ' KB</div></div>' +
+          '<a href="' + doc.url + '" target="_blank" style="background:var(--brand);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">Abrir ↗</a>' +
+          '</div>';
+      }
+    }).join('');
+
+    document.getElementById('docs-modal-body').innerHTML = html;
+  } catch(err) {
+    document.getElementById('docs-modal-body').innerHTML =
+      '<div style="padding:20px;color:red">Error al cargar documentos: ' + err.message + '</div>';
+  }
+}
+
+function closeDocsModal() {
+  document.getElementById('docs-modal').style.display = 'none';
+  document.body.style.overflow = '';
+  currentDocs = [];
+}
+
+function printDocs() {
+  var imgUrls = currentDocs.filter(function(d){ return /\.(jpg|jpeg|png|webp)$/i.test(d.url); }).map(function(d){ return d.url; });
+  if (!imgUrls.length) { alert('No hay imágenes para imprimir.'); return; }
+  var w = window.open('', '_blank');
+  w.document.write('<html><head><title>Documentos SOSATI</title><style>body{margin:0}img{width:100%;page-break-after:always;display:block}</style></head><body>');
+  imgUrls.forEach(function(url){ w.document.write('<img src="' + url + '" />'); });
+  w.document.write('</body></html>');
+  w.document.close();
+  w.onload = function(){ w.print(); };
+}
+
+// Close modal on backdrop click
+document.getElementById('docs-modal').addEventListener('click', function(e){
+  if (e.target === this) closeDocsModal();
+});
 </script>
 </body>
 </html>
