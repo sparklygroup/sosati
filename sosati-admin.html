@@ -701,6 +701,7 @@ function showToast(msg, type = "info") {
           <input type="file" id="admin-upload-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="adminUploadDoc(this)">
         </label>
         <button onclick="sendForSignature()" style="background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">✍️ Enviar para firmar</button>
+        <button id="btn-download-signed" onclick="downloadSigned()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px;display:none;align-items:center;gap:6px">📥 Descargar firmado</button>
       </div>
     </div>
   </div>
@@ -715,6 +716,17 @@ async function viewDocs(apptId, clientName) {
   document.getElementById('docs-modal-body').innerHTML = '<div style="padding:20px">Cargando...</div>';
   document.getElementById('docs-modal').style.display = 'block';
   document.body.style.overflow = 'hidden';
+  // Check if appointment has envelope_id
+  var all = SOSATI.storage.getAll ? SOSATI.storage.getAll() : [];
+  var appt = all.find(function(a){ return a.id === apptId; });
+  var dlBtn = document.getElementById('btn-download-signed');
+  if (appt && appt.envelope_id) {
+    dlBtn.style.display = 'inline-flex';
+    dlBtn.dataset.envelopeId = appt.envelope_id;
+  } else {
+    dlBtn.style.display = 'none';
+    dlBtn.dataset.envelopeId = '';
+  }
 
   try {
     const res = await fetch('/api/documents/' + apptId);
@@ -887,11 +899,60 @@ async function sendForSignature() {
     const data = await res.json();
     if (data.success) {
       showToast('✅ Documento enviado a ' + clientEmail + ' para firma', 'success');
+      // Save envelopeId to appointment
+      await fetch('/api/appointments/' + apptId, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ envelope_id: data.envelopeId, signature_status: 'sent' })
+      });
+      // Show download button
+      document.getElementById('btn-download-signed').style.display = 'inline-flex';
+      document.getElementById('btn-download-signed').dataset.envelopeId = data.envelopeId;
     } else {
       showToast('Error: ' + (data.error || 'No se pudo enviar'), 'error');
     }
   } catch(err) {
     showToast('Error al enviar: ' + err.message, 'error');
+  }
+}
+
+async function downloadSigned() {
+  var btn = document.getElementById('btn-download-signed');
+  var envelopeId = btn.dataset.envelopeId;
+  var apptId = document.getElementById('docs-modal-id').textContent;
+
+  // Check status first
+  showToast('Verificando estado de firma...', 'info');
+  try {
+    const res = await fetch('/api/docusign/status/' + envelopeId);
+    const data = await res.json();
+
+    if (data.status === 'completed') {
+      showToast('Descargando documento firmado...', 'info');
+      const dlRes = await fetch('/api/docusign/download/' + envelopeId);
+      if (dlRes.ok) {
+        const blob = await dlRes.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'firmado-' + apptId + '.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('✅ Documento firmado descargado', 'success');
+        // Update status
+        await fetch('/api/appointments/' + apptId, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ signature_status: 'completed' })
+        });
+      } else {
+        showToast('Error al descargar', 'error');
+      }
+    } else {
+      showToast('El cliente aún no ha firmado. Estado: ' + (data.status || 'pendiente'), 'info');
+    }
+  } catch(err) {
+    showToast('Error: ' + err.message, 'error');
   }
 }
 </script>

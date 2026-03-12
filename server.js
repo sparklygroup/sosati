@@ -102,10 +102,14 @@ app.get("/api/appointments", async (req, res) => {
 // ── API: ACTUALIZAR ESTADO ────────────────────────────────
 app.patch("/api/appointments/:id", async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, envelope_id, signature_status } = req.body;
+    const updates = { updated_at: new Date().toISOString() };
+    if (status !== undefined) updates.status = status;
+    if (envelope_id !== undefined) updates.envelope_id = envelope_id;
+    if (signature_status !== undefined) updates.signature_status = signature_status;
     const { data, error } = await supabase
       .from("appointments")
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq("id", req.params.id)
       .select()
       .single();
@@ -322,6 +326,43 @@ app.delete("/api/documents/:publicId", async (req, res) => {
     }
   } catch (err) {
     console.error("Delete error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── DOCUSIGN: STATUS Y DOWNLOAD ──────────────────────────
+app.get("/api/docusign/status/:envelopeId", async (req, res) => {
+  try {
+    const accessToken = await getDocuSignJWTToken();
+    const dsClient = new docusign.ApiClient();
+    dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");
+    dsClient.addDefaultHeader("Authorization", "Bearer " + accessToken);
+    const envelopesApi = new docusign.EnvelopesApi(dsClient);
+    const result = await envelopesApi.getEnvelope(process.env.DOCUSIGN_ACCOUNT_ID, req.params.envelopeId);
+    res.json({ status: result.status, completedDateTime: result.completedDateTime });
+  } catch(err) {
+    console.error("DocuSign status error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/docusign/download/:envelopeId", async (req, res) => {
+  try {
+    const accessToken = await getDocuSignJWTToken();
+    const url = process.env.DOCUSIGN_BASE_URI + "/restapi/v2.1/accounts/" +
+      process.env.DOCUSIGN_ACCOUNT_ID + "/envelopes/" + req.params.envelopeId + "/documents/combined";
+    const docRes = await fetch(url, {
+      headers: { "Authorization": "Bearer " + accessToken }
+    });
+    if (!docRes.ok) {
+      return res.status(docRes.status).json({ error: "No se pudo descargar" });
+    }
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=documento-firmado.pdf");
+    const buf = await docRes.arrayBuffer();
+    res.send(Buffer.from(buf));
+  } catch(err) {
+    console.error("DocuSign download error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
