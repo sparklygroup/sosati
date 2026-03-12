@@ -158,6 +158,28 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
   }
 });
 
+// ── API: OBTENER DOCUMENTOS DE UNA CITA ──────────────────
+app.get("/api/documents/:appointmentId", async (req, res) => {
+  try {
+    const folder = "sosati/seal-services/" + req.params.appointmentId;
+    const result = await cloudinary.api.resources({
+      type: "upload",
+      prefix: folder,
+      max_results: 50
+    });
+    const docs = result.resources.map(r => ({
+      url: r.secure_url,
+      publicId: r.public_id,
+      format: r.format,
+      size: r.bytes,
+      createdAt: r.created_at
+    }));
+    res.json({ success: true, documents: docs });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── API: HEALTH CHECK ─────────────────────────────────────
 app.get("/api/health", (req, res) => {
   res.json({
