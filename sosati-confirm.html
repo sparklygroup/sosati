@@ -18,10 +18,9 @@
       padding: 0 0 80px;
     }
 
-    /* HERO SUCCESS */
     .success-hero {
       width: 100%;
-      background: linear-gradient(160deg, var(--brand) 0%, var(--brand-light) 100%);
+      background: linear-gradient(160deg, var(--brand-dark) 0%, var(--brand-light) 100%);
       padding: 48px 24px 36px;
       text-align: center;
       position: relative;
@@ -33,15 +32,6 @@
       position: absolute;
       top: -60px; right: -60px;
       width: 200px; height: 200px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-    }
-
-    .success-hero::after {
-      content: '';
-      position: absolute;
-      bottom: -40px; left: -40px;
-      width: 150px; height: 150px;
       border-radius: 50%;
       background: rgba(255,255,255,0.05);
     }
@@ -74,7 +64,6 @@
       animation: fadeUp 0.5s 0.3s ease both;
     }
 
-    /* DETAIL CARD */
     .detail-card {
       width: calc(100% - 32px);
       max-width: 448px;
@@ -123,7 +112,6 @@
       line-height: 1.4;
     }
 
-    /* CONFIRMATION ID */
     .conf-id-box {
       width: calc(100% - 32px);
       max-width: 448px;
@@ -166,7 +154,137 @@
 
     .copy-btn:hover { background: var(--brand-dark); }
 
-    /* ACTIONS */
+    /* ── UPLOAD SECTION ─────────────────────────────────── */
+    .upload-section {
+      width: calc(100% - 32px);
+      max-width: 448px;
+      margin: 0 auto 16px;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+
+    .upload-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .upload-title {
+      font-family: var(--font-display);
+      font-size: 17px;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+
+    .upload-subtitle {
+      font-size: 12.5px;
+      color: var(--gray-400);
+      margin-bottom: 18px;
+    }
+
+    .doc-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .doc-type-btn {
+      padding: 10px 8px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      background: var(--white);
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .doc-type-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-alpha); }
+    .doc-type-btn.selected { border-color: var(--brand); background: var(--brand); color: var(--white); }
+
+    .upload-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .upload-btn {
+      padding: 13px 10px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .upload-btn-camera {
+      background: var(--brand);
+      color: var(--white);
+    }
+
+    .upload-btn-file {
+      background: var(--brand-soft);
+      color: var(--brand);
+      border: 1.5px solid var(--brand);
+    }
+
+    .upload-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Uploaded files list */
+    .uploaded-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .uploaded-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--gray-50);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-100);
+      animation: fadeUp 0.3s ease;
+    }
+
+    .uploaded-item .file-icon { font-size: 20px; }
+    .uploaded-item .file-name { font-size: 12.5px; font-weight: 600; color: var(--gray-800); flex: 1; }
+    .uploaded-item .file-size { font-size: 11px; color: var(--gray-400); }
+    .uploaded-item .file-check { color: var(--success); font-size: 16px; }
+
+    .upload-progress {
+      height: 4px;
+      background: var(--gray-100);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .upload-progress-bar {
+      height: 100%;
+      background: var(--brand);
+      border-radius: 2px;
+      animation: progressAnim 1.5s ease infinite;
+    }
+
+    @keyframes progressAnim {
+      0%   { width: 0%; }
+      50%  { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    /* Actions */
     .actions-area {
       width: calc(100% - 32px);
       max-width: 448px;
@@ -174,10 +292,9 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      animation: fadeUp 0.5s 0.35s ease both;
+      animation: fadeUp 0.5s 0.4s ease both;
     }
 
-    /* REMINDER BOX */
     .reminder-box {
       width: calc(100% - 32px);
       max-width: 448px;
@@ -186,15 +303,10 @@
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: var(--radius-md);
       padding: 14px 16px;
-      animation: fadeUp 0.5s 0.4s ease both;
+      animation: fadeUp 0.5s 0.45s ease both;
     }
 
-    .reminder-box p {
-      font-size: 12.5px;
-      color: rgba(255,255,255,0.85);
-      line-height: 1.6;
-    }
-
+    .reminder-box p { font-size: 12.5px; color: rgba(255,255,255,0.85); line-height: 1.6; }
     .reminder-box strong { color: var(--white); }
 
     @keyframes popIn {
@@ -202,25 +314,23 @@
       60%  { transform: scale(1.15); }
       100% { transform: scale(1); opacity: 1; }
     }
+
+    /* Hidden file inputs */
+    #file-camera, #file-gallery { display: none; }
   </style>
 </head>
 <body>
 
 <div class="confirm-wrapper">
 
-  <!-- SUCCESS HERO -->
   <div class="success-hero">
     <div class="success-checkmark">✅</div>
     <h2>¡Cita Agendada!</h2>
     <p>Te esperamos en Seal Services · Fresno, CA</p>
   </div>
 
-  <!-- DETAIL CARD -->
-  <div class="detail-card" id="detail-card">
-    <!-- generado por JS -->
-  </div>
+  <div class="detail-card" id="detail-card"></div>
 
-  <!-- CONFIRMATION ID -->
   <div class="conf-id-box">
     <div class="conf-id-inner">
       <div>
@@ -228,6 +338,40 @@
         <div class="conf-id-value" id="conf-id">—</div>
       </div>
       <button class="copy-btn" onclick="copyId()">Copiar</button>
+    </div>
+  </div>
+
+  <!-- UPLOAD SECTION -->
+  <div class="upload-section">
+    <div class="upload-card">
+      <div class="upload-title">📎 Sube tus documentos</div>
+      <div class="upload-subtitle">Opcional — facilita tu cita subiendo tus documentos antes de llegar</div>
+
+      <!-- Tipo de documento -->
+      <div class="doc-type-grid" id="doc-type-grid">
+        <button class="doc-type-btn selected" data-type="id" onclick="selectDocType('id', this)">🪪 ID / Licencia</button>
+        <button class="doc-type-btn" data-type="tax" onclick="selectDocType('tax', this)">📋 Forma de impuestos</button>
+        <button class="doc-type-btn" data-type="insurance" onclick="selectDocType('insurance', this)">🛡️ Tarjeta de seguro</button>
+        <button class="doc-type-btn" data-type="other" onclick="selectDocType('other', this)">📄 Otro documento</button>
+      </div>
+
+      <!-- Botones de subida -->
+      <div class="upload-buttons">
+        <button class="upload-btn upload-btn-camera" onclick="openCamera()">
+          📷 Tomar foto
+        </button>
+        <button class="upload-btn upload-btn-file" onclick="openGallery()">
+          📁 Seleccionar archivo
+        </button>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="upload-progress" id="upload-progress">
+        <div class="upload-progress-bar"></div>
+      </div>
+
+      <!-- Lista de archivos subidos -->
+      <div class="uploaded-list" id="uploaded-list"></div>
     </div>
   </div>
 
@@ -241,7 +385,6 @@
     </a>
   </div>
 
-  <!-- REMINDER -->
   <div class="reminder-box">
     <p>
       📌 <strong>Recuerda:</strong> Llega 10 minutos antes de tu cita.<br>
@@ -252,29 +395,30 @@
 
 </div>
 
-<!-- TOAST -->
+<!-- Hidden file inputs -->
+<input type="file" id="file-camera" accept="image/*" capture="environment" onchange="handleFile(this)" />
+<input type="file" id="file-gallery" accept="image/*,application/pdf" onchange="handleFile(this)" />
+
 <div id="sosati-toast"></div>
 
 <script src="sosati-core.js"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const raw = sessionStorage.getItem("sosati_last_appt");
-    if (!raw) {
-      // No hay cita — redirigir al formulario
-      window.location.href = "sosati-appointment.html";
-      return;
-    }
+  var currentAppt    = null;
+  var selectedDocType = "id";
+  var uploadedDocs   = [];
 
-    const appt = JSON.parse(raw);
-    renderDetails(appt);
-    document.getElementById("conf-id").textContent = appt.id;
+  document.addEventListener("DOMContentLoaded", function() {
+    var raw = sessionStorage.getItem("sosati_last_appt");
+    if (!raw) { window.location.href = "sosati-appointment.html"; return; }
+    currentAppt = JSON.parse(raw);
+    renderDetails(currentAppt);
+    document.getElementById("conf-id").textContent = currentAppt.id;
   });
 
   function renderDetails(appt) {
-    const serviceObj = SOSATI.config.services.find(s => s.id === appt.service);
-    const icon = serviceObj?.icon || "🛠️";
-
-    const rows = [
+    var serviceObj = SOSATI.config.services.find(function(s){ return s.id === appt.service; });
+    var icon = serviceObj ? serviceObj.icon : "🛠️";
+    var rows = [
       { icon: "👤", label: "Nombre",   value: appt.name },
       { icon: "📞", label: "Teléfono", value: appt.phone },
       { icon: icon, label: "Servicio", value: appt.serviceLabel },
@@ -282,37 +426,102 @@
       { icon: "🕐", label: "Horario",  value: appt.time },
       { icon: "📍", label: "Oficina",  value: appt.locationLabel }
     ];
+    if (appt.notes) rows.push({ icon: "📝", label: "Notas", value: appt.notes });
 
-    if (appt.notes) {
-      rows.push({ icon: "📝", label: "Notas", value: appt.notes });
-    }
-
-    const card = document.getElementById("detail-card");
-    card.innerHTML = rows.map(r => `
-      <div class="detail-row">
-        <div class="detail-icon">${r.icon}</div>
-        <div>
-          <div class="detail-label">${r.label}</div>
-          <div class="detail-value">${r.value}</div>
-        </div>
-      </div>
-    `).join("");
+    document.getElementById("detail-card").innerHTML = rows.map(function(r) {
+      return '<div class="detail-row">' +
+        '<div class="detail-icon">' + r.icon + '</div>' +
+        '<div><div class="detail-label">' + r.label + '</div>' +
+        '<div class="detail-value">' + r.value + '</div></div>' +
+        '</div>';
+    }).join("");
   }
 
   function copyId() {
-    const id = document.getElementById("conf-id").textContent;
-    navigator.clipboard?.writeText(id).then(() => {
-      showToast("Número copiado al portapapeles ✓", "success");
-    }).catch(() => {
+    var id = document.getElementById("conf-id").textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(id).then(function(){ showToast("Número copiado ✓", "success"); });
+    } else {
       showToast("ID: " + id, "info");
+    }
+  }
+
+  function selectDocType(type, el) {
+    selectedDocType = type;
+    document.querySelectorAll(".doc-type-btn").forEach(function(b){ b.classList.remove("selected"); });
+    el.classList.add("selected");
+  }
+
+  function openCamera() {
+    document.getElementById("file-camera").click();
+  }
+
+  function openGallery() {
+    document.getElementById("file-gallery").click();
+  }
+
+  function handleFile(input) {
+    var file = input.files[0];
+    if (!file) return;
+    uploadFile(file);
+    input.value = ""; // reset para permitir subir el mismo archivo de nuevo
+  }
+
+  function uploadFile(file) {
+    if (!currentAppt) { showToast("Error: no hay cita activa", "error"); return; }
+
+    var progress = document.getElementById("upload-progress");
+    progress.style.display = "block";
+
+    var formData = new FormData();
+    formData.append("file", file);
+    formData.append("appointmentId", currentAppt.id);
+    formData.append("clientName", currentAppt.name);
+    formData.append("docType", selectedDocType);
+
+    fetch("/api/upload", {
+      method: "POST",
+      body: formData
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(data) {
+      progress.style.display = "none";
+      if (data.success) {
+        addUploadedItem(file.name, file.size, data.url);
+        showToast("Documento subido correctamente ✓", "success");
+      } else {
+        showToast("Error: " + (data.error || "No se pudo subir"), "error");
+      }
+    })
+    .catch(function(err) {
+      progress.style.display = "none";
+      showToast("Error al subir el archivo", "error");
+      console.error(err);
     });
   }
 
-  function showToast(msg, type = "info") {
-    const t = document.getElementById("sosati-toast");
-    t.textContent = msg;
-    t.className = `show ${type}`;
-    setTimeout(() => { t.className = ""; }, 3000);
+  function addUploadedItem(name, size, url) {
+    var list = document.getElementById("uploaded-list");
+    var kb = Math.round(size / 1024);
+    var isImage = /\.(jpg|jpeg|png|webp)$/i.test(name);
+    var icon = isImage ? "🖼️" : "📄";
+
+    var div = document.createElement("div");
+    div.className = "uploaded-item";
+    div.innerHTML =
+      '<span class="file-icon">' + icon + '</span>' +
+      '<span class="file-name">' + name + '</span>' +
+      '<span class="file-size">' + kb + ' KB</span>' +
+      '<span class="file-check">✅</span>';
+    list.appendChild(div);
+    uploadedDocs.push(url);
+  }
+
+  function showToast(msg, type) {
+    type = type || "info";
+    var t = document.getElementById("sosati-toast");
+    t.textContent = msg; t.className = "show " + type;
+    setTimeout(function(){ t.className = ""; }, 3500);
   }
 </script>
 </body>
