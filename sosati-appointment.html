@@ -247,7 +247,7 @@
       return valid;
     }
 
-    function submitForm() {
+    async function submitForm() {
       if (!validate()) {
         showToast("Por favor completa todos los campos requeridos.", "error");
         var firstErr = document.querySelector(".has-error");
@@ -257,7 +257,7 @@
       var btn = document.getElementById("btn-submit");
       btn.disabled = true; btn.innerHTML = '<span class="loader"></span>';
       try {
-        var appt = SOSATI.createAppointment({
+        var appt = await SOSATI.createAppointment({
           name:     document.getElementById("inp-name").value,
           phone:    document.getElementById("inp-phone").value,
           email:    document.getElementById("inp-email").value,
@@ -267,7 +267,8 @@
           location: document.getElementById("inp-location").value,
           notes:    document.getElementById("inp-notes").value
         });
-        if (gapiInited && gisInited) {
+        var isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+        if (!isMobile && gapiInited && gisInited) {
           pendingAppt = appt;
           showToast("Conectando con Google Calendar...", "info");
           if (gapi.client.getToken() === null) {
@@ -276,7 +277,6 @@
             doCreateEvent(appt);
           }
         } else {
-          console.log("Calendar no disponible, solo guardando local");
           setTimeout(function(){ window.location.href = "sosati-confirm.html"; }, 600);
         }
       } catch(err) {
