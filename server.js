@@ -95,8 +95,8 @@ app.get("/api/documents/:appointmentId", async (req, res) => {
 });
 
 // ── API: ELIMINAR DOCUMENTO ───────────────────────────────
-app.delete("/api/documents/*", async (req, res) => {
-  req.params.publicId = req.params[0];
+app.delete("/api/documents/:folder/:publicId", async (req, res) => {
+  req.params.publicId = req.params.folder + "/" + req.params.publicId;
   try {
     await cloudinary.uploader.destroy(req.params.publicId);
     res.json({ success: true });
