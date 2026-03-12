@@ -255,22 +255,12 @@ app.post("/api/docusign/send", async (req, res) => {
       documentId: "1"
     });
 
-    // Crear firmante con tab de firma
+    // Crear firmante
     const signer = docusign.Signer.constructFromObject({
       email: clientEmail,
       name: clientName,
       recipientId: "1",
-      routingOrder: "1",
-      tabs: docusign.Tabs.constructFromObject({
-        signHereTabs: [
-          docusign.SignHere.constructFromObject({
-            documentId: "1",
-            pageNumber: "1",
-            xPosition: "100",
-            yPosition: "700"
-          })
-        ]
-      })
+      routingOrder: "1"
     });
 
     // Crear sobre
