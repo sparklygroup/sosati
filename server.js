@@ -185,7 +185,7 @@ app.get("/api/documents/:appointmentId", async (req, res) => {
 async function getDocuSignJWTToken() {
   const dsClient = new docusign.ApiClient();
   dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");
-  dsClient.setOAuthBasePath(process.env.DOCUSIGN_BASE_URI.replace("https://", ""));
+  dsClient.setOAuthBasePath("account-d.docusign.com");
 
   // Reconstruct private key as Buffer (Railway stores as single line base64 body)
   const privateKeyRaw = process.env.DOCUSIGN_PRIVATE_KEY || "";
