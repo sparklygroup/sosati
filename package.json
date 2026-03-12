@@ -16,6 +16,8 @@
     "cloudinary": "^2.9.0",
     "docusign-esign": "^8.6.0",
     "express": "^5.2.1",
-    "multer": "^2.1.1"
+    "multer": "^2.1.1",
+    "pdfkit": "^0.17.2",
+    "sharp": "^0.34.5"
   }
 }
