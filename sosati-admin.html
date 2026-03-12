@@ -788,7 +788,9 @@ document.getElementById('docs-modal').addEventListener('click', function(e){
 async function deleteDoc(publicId, index) {
   if (!confirm('¿Borrar este documento?')) return;
   try {
-    const res = await fetch('/api/documents/' + encodeURIComponent(publicId), { method: 'DELETE' });
+    const doc = currentDocs[index];
+    const resourceType = doc.resourceType || 'image';
+    const res = await fetch('/api/documents/' + encodeURIComponent(publicId) + '?resourceType=' + resourceType, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
       currentDocs.splice(index, 1);

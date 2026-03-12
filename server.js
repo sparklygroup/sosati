@@ -142,8 +142,9 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
     const publicId = (docType || "doc") + "-" + Date.now();
 
     const result = await new Promise((resolve, reject) => {
+      const isPdf = req.file.mimetype === "application/pdf";
       const stream = cloudinary.uploader.upload_stream(
-        { folder, public_id: publicId, resource_type: "auto",
+        { folder, public_id: publicId, resource_type: isPdf ? "raw" : "image",
           tags: ["sosati", "seal-services", docType || "document"],
           context: { client_name: clientName || "", appointment_id: appointmentId || "", doc_type: docType || "other" }
         },
@@ -163,19 +164,23 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 app.get("/api/documents/:appointmentId", async (req, res) => {
   try {
     const folder = "sosati/seal-services/" + req.params.appointmentId;
-    const result = await cloudinary.api.resources({
-      type: "upload",
-      prefix: folder,
-      max_results: 50
-    });
-    const docs = result.resources.map(r => ({
+    // Fetch both image and raw resource types
+    const [imgResult, rawResult] = await Promise.allSettled([
+      cloudinary.api.resources({ type: "upload", resource_type: "image", prefix: folder, max_results: 50 }),
+      cloudinary.api.resources({ type: "upload", resource_type: "raw", prefix: folder, max_results: 50 })
+    ]);
+    const imgDocs = imgResult.status === "fulfilled" ? imgResult.value.resources : [];
+    const rawDocs = rawResult.status === "fulfilled" ? rawResult.value.resources : [];
+    const allDocs = [...imgDocs, ...rawDocs].map(r => ({
       url: r.secure_url,
       publicId: r.public_id,
       format: r.format,
       size: r.bytes,
-      createdAt: r.created_at
+      createdAt: r.created_at,
+      resourceType: r.resource_type
     }));
-    res.json({ success: true, documents: docs });
+    allDocs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    res.json({ success: true, documents: allDocs });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -305,17 +310,15 @@ app.post("/api/docusign/send", async (req, res) => {
 app.delete("/api/documents/:publicId", async (req, res) => {
   try {
     const publicId = decodeURIComponent(req.params.publicId);
-    // Try both image and raw resource types
-    let result;
-    try {
-      result = await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
-    } catch(e) {
-      result = await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
-    }
+    const resourceType = req.query.resourceType || "image";
+    const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
     if (result.result === "ok" || result.result === "not found") {
       res.json({ success: true });
     } else {
-      res.status(500).json({ error: "No se pudo borrar", result });
+      // Try the other resource type
+      const alt = resourceType === "image" ? "raw" : "image";
+      const result2 = await cloudinary.uploader.destroy(publicId, { resource_type: alt });
+      res.json({ success: true, result: result2 });
     }
   } catch (err) {
     console.error("Delete error:", err);
