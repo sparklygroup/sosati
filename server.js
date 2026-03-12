@@ -225,12 +225,27 @@ app.post("/api/docusign/send", async (req, res) => {
     dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");
     dsClient.addDefaultHeader("Authorization", "Bearer " + accessToken);
 
-    // Descargar documento de Cloudinary
-    const docResponse = await fetch(documentUrl);
-    const docBuffer = await docResponse.arrayBuffer();
-    const docBase64 = Buffer.from(docBuffer).toString("base64");
+    // Generar URL firmada de Cloudinary
     const ext = documentUrl.split(".").pop().toLowerCase().split("?")[0];
     const fileExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "pdf";
+    const urlParts = documentUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
+    let fetchUrl = documentUrl;
+    if (urlParts) {
+      const publicId = urlParts[1];
+      const resourceType = fileExt === "pdf" ? "raw" : "image";
+      fetchUrl = cloudinary.url(publicId, {
+        resource_type: resourceType,
+        sign_url: true,
+        type: "upload",
+        format: fileExt
+      });
+    }
+    console.log("Fetching doc from:", fetchUrl.substring(0, 80));
+    const docResponse = await fetch(fetchUrl);
+    console.log("Doc fetch status:", docResponse.status);
+    const docBuffer = await docResponse.arrayBuffer();
+    console.log("Doc buffer size:", docBuffer.byteLength);
+    const docBase64 = Buffer.from(docBuffer).toString("base64");
 
     // Crear documento
     const document = docusign.Document.constructFromObject({
