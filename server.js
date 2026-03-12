@@ -1,26 +1,32 @@
 // SOSATI — Express Server
 // Seal Services Appointment System
-// Con Cloudinary para documentos y fotos
+// Con Supabase + Cloudinary
 
 const express    = require("express");
 const path       = require("path");
 const multer     = require("multer");
 const cloudinary = require("cloudinary").v2;
+const { createClient } = require("@supabase/supabase-js");
 
 const app  = express();
 const PORT = process.env.PORT || 8080;
 
-// ── CLOUDINARY CONFIG ─────────────────────────────────────
+// ── SUPABASE ──────────────────────────────────────────────
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
+
+// ── CLOUDINARY ────────────────────────────────────────────
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key:    process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// ── MULTER (memoria temporal para uploads) ────────────────
-const storage = multer.memoryStorage();
-const upload  = multer({
-  storage,
+// ── MULTER ────────────────────────────────────────────────
+const upload = multer({
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
@@ -39,6 +45,86 @@ app.get("/appointment", (req, res) => res.sendFile(path.join(__dirname, "sosati-
 app.get("/confirm",     (req, res) => res.sendFile(path.join(__dirname, "sosati-confirm.html")));
 app.get("/admin",       (req, res) => res.sendFile(path.join(__dirname, "sosati-admin.html")));
 
+// ── API: CREAR CITA ───────────────────────────────────────
+app.post("/api/appointments", async (req, res) => {
+  try {
+    const appt = req.body;
+    const { data, error } = await supabase
+      .from("appointments")
+      .insert([{
+        id:             appt.id,
+        name:           appt.name,
+        phone:          appt.phone,
+        email:          appt.email || null,
+        service:        appt.service,
+        service_label:  appt.serviceLabel,
+        date:           appt.date,
+        time:           appt.time,
+        location:       appt.location,
+        location_label: appt.locationLabel,
+        notes:          appt.notes || null,
+        status:         "pending"
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ success: true, appointment: data });
+  } catch (err) {
+    console.error("Create appointment error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── API: OBTENER TODAS LAS CITAS ──────────────────────────
+app.get("/api/appointments", async (req, res) => {
+  try {
+    let query = supabase.from("appointments").select("*").order("date", { ascending: true });
+
+    if (req.query.date)   query = query.eq("date", req.query.date);
+    if (req.query.status) query = query.eq("status", req.query.status);
+
+    const { data, error } = await query;
+    if (error) throw error;
+    res.json({ success: true, appointments: data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── API: ACTUALIZAR ESTADO ────────────────────────────────
+app.patch("/api/appointments/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { data, error } = await supabase
+      .from("appointments")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ success: true, appointment: data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── API: ELIMINAR CITA ────────────────────────────────────
+app.delete("/api/appointments/:id", async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from("appointments")
+      .delete()
+      .eq("id", req.params.id);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── API: SUBIR DOCUMENTO ──────────────────────────────────
 app.post("/api/upload", upload.single("file"), async (req, res) => {
   try {
@@ -50,68 +136,36 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 
     const result = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
-        {
-          folder,
-          public_id:     publicId,
-          resource_type: "auto",
-          tags:          ["sosati", "seal-services", docType || "document"],
-          context: {
-            client_name:    clientName || "",
-            appointment_id: appointmentId || "",
-            doc_type:       docType || "other"
-          }
+        { folder, public_id: publicId, resource_type: "auto",
+          tags: ["sosati", "seal-services", docType || "document"],
+          context: { client_name: clientName || "", appointment_id: appointmentId || "", doc_type: docType || "other" }
         },
         (err, result) => err ? reject(err) : resolve(result)
       );
       stream.end(req.file.buffer);
     });
 
-    res.json({
-      success:  true,
-      url:      result.secure_url,
-      publicId: result.public_id,
-      format:   result.format,
-      size:     result.bytes
-    });
-
+    res.json({ success: true, url: result.secure_url, publicId: result.public_id, format: result.format, size: result.bytes });
   } catch (err) {
     console.error("Upload error:", err);
-    res.status(500).json({ error: err.message || "Error al subir archivo" });
-  }
-});
-
-// ── API: OBTENER DOCUMENTOS DE UNA CITA ──────────────────
-app.get("/api/documents/:appointmentId", async (req, res) => {
-  try {
-    const folder = "sosati/seal-services/" + req.params.appointmentId;
-    const result = await cloudinary.api.resources({ type: "upload", prefix: folder, max_results: 50 });
-    const docs = result.resources.map(r => ({
-      url: r.secure_url, publicId: r.public_id, format: r.format, size: r.bytes, createdAt: r.created_at
-    }));
-    res.json({ success: true, documents: docs });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ── API: ELIMINAR DOCUMENTO ───────────────────────────────
-app.delete("/api/documents/:folder/:publicId", async (req, res) => {
-  req.params.publicId = req.params.folder + "/" + req.params.publicId;
-  try {
-    await cloudinary.uploader.destroy(req.params.publicId);
-    res.json({ success: true });
-  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // ── API: HEALTH CHECK ─────────────────────────────────────
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", service: "SOSATI", time: new Date().toISOString() });
+  res.json({
+    status:     "ok",
+    service:    "SOSATI",
+    supabase:   process.env.SUPABASE_URL ? "conectado" : "no configurado",
+    cloudinary: process.env.CLOUDINARY_CLOUD_NAME ? "conectado" : "no configurado",
+    time:       new Date().toISOString()
+  });
 });
 
 // ── START ─────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log("SOSATI corriendo en puerto " + PORT);
+  console.log("Supabase:   " + (process.env.SUPABASE_URL ? "Conectado" : "No configurado"));
   console.log("Cloudinary: " + (process.env.CLOUDINARY_CLOUD_NAME ? "Conectado" : "No configurado"));
 });

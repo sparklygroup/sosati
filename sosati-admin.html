@@ -471,7 +471,21 @@ function setDefaultDate() {
 // ══════════════════════════════════════════════════════
 // RENDER
 // ══════════════════════════════════════════════════════
-function renderAll() {
+async function renderAll() {
+  try {
+    const result = await SOSATI.api.getAppointments();
+    if (result.success && result.appointments) {
+      const appts = result.appointments.map(a => ({
+        id: a.id, name: a.name, phone: a.phone, email: a.email || '',
+        service: a.service, serviceLabel: a.service_label,
+        date: a.date, time: a.time,
+        location: a.location, locationLabel: a.location_label,
+        notes: a.notes || '', status: a.status,
+        createdAt: a.created_at, updatedAt: a.updated_at
+      }));
+      SOSATI.storage.save(appts);
+    }
+  } catch(err) { console.warn('Usando datos locales:', err); }
   updateStats();
   renderList();
 }
@@ -588,10 +602,13 @@ function buildCard(a) {
 // ══════════════════════════════════════════════════════
 // ACTIONS
 // ══════════════════════════════════════════════════════
-function changeStatus(id, status) {
-  SOSATI.storage.updateStatus(id, status);
+async function changeStatus(id, status) {
+  try { await SOSATI.api.updateStatus(id, status); } catch(err) { console.warn(err); }
+  const all = SOSATI.storage.getAll();
+  const idx = all.findIndex(a => a.id === id);
+  if (idx !== -1) { all[idx].status = status; SOSATI.storage.save(all); }
   renderAll();
-  const labels = { confirmed: "Cita confirmada ✅", completed: "Marcada como completada ✔️" };
+  const labels = { confirmed: "Cita confirmada", completed: "Marcada como completada" };
   showToast(labels[status] || "Estado actualizado", "success");
 }
 

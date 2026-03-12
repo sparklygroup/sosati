@@ -1,6 +1,7 @@
 // ============================================================
 // SOSATI CORE — Cerebro del sistema de citas
 // Seal Services | sosati.app/sealservices/appointment
+// v2.0 — Con Supabase
 // ============================================================
 
 const SOSATI = {
@@ -10,96 +11,115 @@ const SOSATI = {
     officeName: "Seal Services",
     phone: "(559) 266-6555",
     email: "sealservices@comcast.net",
+    apiBase: "",  // vacío = mismo dominio (Railway)
     locations: [
-      { id: "belmont",  label: "Main Office — 3270 E. Belmont Ave, Fresno CA 93702",   tel: "(559) 266-6555" },
-      { id: "ventura",  label: "Ventura Blvd — 3259 E. Ventura Blvd, Fresno CA 93702", tel: "(559) 493-5911" },
+      { id: "belmont",  label: "Main Office — 3270 E. Belmont Ave, Fresno CA 93702",    tel: "(559) 266-6555" },
+      { id: "ventura",  label: "Ventura Blvd — 3259 E. Ventura Blvd, Fresno CA 93702",  tel: "(559) 493-5911" },
       { id: "kings",    label: "Kings Canyon — 4244 E Kings Canyon Rd #103, Fresno CA 93702", tel: "(559) 493-5911" }
     ],
     services: [
-      { id: "tax",       label: "Impuestos (Tax)",          icon: "📋" },
-      { id: "insurance", label: "Aseguranza (Insurance)",   icon: "🛡️" },
-      { id: "notary",    label: "Notario (Notary Public)",  icon: "✍️" },
-      { id: "dmv",       label: "Registro de Vehículo (DMV)", icon: "🚗" },
-      { id: "accounting",label: "Contabilidad",             icon: "📊" },
-      { id: "general",   label: "Asesoría General",         icon: "💬" }
+      { id: "tax",        label: "Impuestos (Tax)",            icon: "📋" },
+      { id: "insurance",  label: "Aseguranza (Insurance)",     icon: "🛡️" },
+      { id: "notary",     label: "Notario (Notary Public)",    icon: "✍️" },
+      { id: "dmv",        label: "Registro de Vehículo (DMV)", icon: "🚗" },
+      { id: "accounting", label: "Contabilidad",               icon: "📊" },
+      { id: "general",    label: "Asesoría General",           icon: "💬" }
     ],
-    // Horarios disponibles 10am - 6pm (cada hora)
     timeSlots: [
       "10:00 AM", "11:00 AM", "12:00 PM",
       "1:00 PM",  "2:00 PM",  "3:00 PM",
       "4:00 PM",  "5:00 PM",  "6:00 PM"
     ],
-    adminPassword: "sosati2024",  // Fase 2: reemplazar con auth real
+    adminPassword: "sosati2024",
     broadcastChannel: "sosati_appointments"
   },
 
-  // ── STORAGE ───────────────────────────────────────────────
+  // ── API (Supabase via server) ──────────────────────────────
+  api: {
+    async request(method, path, body) {
+      const opts = {
+        method,
+        headers: { "Content-Type": "application/json" }
+      };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(SOSATI.config.apiBase + path, opts);
+      return res.json();
+    },
+    async getAppointments(filters) {
+      let path = "/api/appointments";
+      const params = new URLSearchParams();
+      if (filters?.date)   params.set("date", filters.date);
+      if (filters?.status) params.set("status", filters.status);
+      if (params.toString()) path += "?" + params.toString();
+      return this.request("GET", path);
+    },
+    async createAppointment(appt) {
+      return this.request("POST", "/api/appointments", appt);
+    },
+    async updateStatus(id, status) {
+      return this.request("PATCH", "/api/appointments/" + id, { status });
+    },
+    async deleteAppointment(id) {
+      return this.request("DELETE", "/api/appointments/" + id);
+    }
+  },
+
+  // ── STORAGE LOCAL (fallback + cache) ──────────────────────
   storage: {
     getAll() {
-      try {
-        return JSON.parse(localStorage.getItem("sosati_appointments") || "[]");
-      } catch { return []; }
+      try { return JSON.parse(localStorage.getItem("sosati_appointments") || "[]"); }
+      catch { return []; }
     },
     save(appointments) {
       localStorage.setItem("sosati_appointments", JSON.stringify(appointments));
     },
-    addAppointment(appt) {
+    addLocal(appt) {
       const all = this.getAll();
-      all.unshift(appt); // más reciente primero
+      all.unshift(appt);
       this.save(all);
-      return appt;
     },
     getByDate(dateStr) {
       return this.getAll().filter(a => a.date === dateStr);
-    },
-    getById(id) {
-      return this.getAll().find(a => a.id === id);
-    },
-    updateStatus(id, status) {
-      const all = this.getAll();
-      const idx = all.findIndex(a => a.id === id);
-      if (idx !== -1) {
-        all[idx].status = status;
-        all[idx].updatedAt = new Date().toISOString();
-        this.save(all);
-        SOSATI.broadcast({ type: "STATUS_UPDATE", id, status });
-        return all[idx];
-      }
-    },
-    delete(id) {
-      const all = this.getAll().filter(a => a.id !== id);
-      this.save(all);
-      SOSATI.broadcast({ type: "DELETED", id });
     }
   },
 
-  // ── CITAS ─────────────────────────────────────────────────
-  createAppointment(formData) {
+  // ── CREAR CITA ────────────────────────────────────────────
+  async createAppointment(formData) {
     const id = "APT-" + Date.now().toString(36).toUpperCase();
     const appt = {
       id,
-      name:      formData.name.trim(),
-      phone:     formData.phone.trim(),
-      email:     formData.email?.trim() || "",
-      service:   formData.service,
-      serviceLabel: this.config.services.find(s => s.id === formData.service)?.label || formData.service,
-      date:      formData.date,
-      time:      formData.time,
-      location:  formData.location,
-      locationLabel: this.config.locations.find(l => l.id === formData.location)?.label || formData.location,
-      notes:     formData.notes?.trim() || "",
-      status:    "pending",   // pending | confirmed | completed | cancelled
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      name:           formData.name.trim(),
+      phone:          formData.phone.trim(),
+      email:          formData.email?.trim() || "",
+      service:        formData.service,
+      serviceLabel:   this.config.services.find(s => s.id === formData.service)?.label || formData.service,
+      date:           formData.date,
+      time:           formData.time,
+      location:       formData.location,
+      locationLabel:  this.config.locations.find(l => l.id === formData.location)?.label || formData.location,
+      notes:          formData.notes?.trim() || "",
+      status:         "pending",
+      createdAt:      new Date().toISOString(),
+      updatedAt:      new Date().toISOString()
     };
-    this.storage.addAppointment(appt);
-    this.broadcast({ type: "NEW_APPOINTMENT", appointment: appt });
-    // Guardar última cita para pantalla de confirmación
+
+    // Guardar en localStorage como cache inmediato
+    this.storage.addLocal(appt);
     sessionStorage.setItem("sosati_last_appt", JSON.stringify(appt));
+
+    // Guardar en Supabase (en background)
+    try {
+      await this.api.createAppointment(appt);
+      console.log("Cita guardada en Supabase:", id);
+    } catch(err) {
+      console.warn("Supabase no disponible, guardado solo local:", err);
+    }
+
+    this.broadcast({ type: "NEW_APPOINTMENT", appointment: appt });
     return appt;
   },
 
-  // ── BROADCAST (comunicación entre pantallas) ──────────────
+  // ── BROADCAST ─────────────────────────────────────────────
   _channel: null,
   initBroadcast(onMessage) {
     this._channel = new BroadcastChannel(this.config.broadcastChannel);
@@ -114,11 +134,9 @@ const SOSATI = {
     }
   },
 
-  // ── AUTH ADMIN (simple para MVP) ─────────────────────────
+  // ── AUTH ADMIN ────────────────────────────────────────────
   auth: {
-    isLoggedIn() {
-      return sessionStorage.getItem("sosati_admin_auth") === "true";
-    },
+    isLoggedIn() { return sessionStorage.getItem("sosati_admin_auth") === "true"; },
     login(password) {
       if (password === SOSATI.config.adminPassword) {
         sessionStorage.setItem("sosati_admin_auth", "true");
@@ -126,9 +144,7 @@ const SOSATI = {
       }
       return false;
     },
-    logout() {
-      sessionStorage.removeItem("sosati_admin_auth");
-    }
+    logout() { sessionStorage.removeItem("sosati_admin_auth"); }
   },
 
   // ── HELPERS ───────────────────────────────────────────────
@@ -137,11 +153,9 @@ const SOSATI = {
       if (!dateStr) return "";
       const [y, m, d] = dateStr.split("-");
       const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-      return `${d} ${months[parseInt(m)-1]} ${y}`;
+      return d + " " + months[parseInt(m)-1] + " " + y;
     },
-    todayStr() {
-      return new Date().toISOString().split("T")[0];
-    },
+    todayStr() { return new Date().toISOString().split("T")[0]; },
     statusLabel(status) {
       const map = {
         pending:   { text: "Pendiente",  color: "#f59e0b" },
@@ -160,5 +174,4 @@ const SOSATI = {
   }
 };
 
-// Exportar para uso en otros archivos
 if (typeof module !== "undefined") module.exports = SOSATI;
