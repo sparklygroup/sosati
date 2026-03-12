@@ -277,7 +277,8 @@ app.post("/api/docusign/send", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("DocuSign error:", err.message || err);
+    const detail = err.response?.body || err.message || String(err);
+    console.error("DocuSign error:", JSON.stringify(detail));
     res.status(500).json({ error: err.message || "Error al enviar documento" });
   }
 });
