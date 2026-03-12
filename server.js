@@ -7,6 +7,7 @@ const path       = require("path");
 const multer     = require("multer");
 const cloudinary = require("cloudinary").v2;
 const { createClient } = require("@supabase/supabase-js");
+const docusign = require("docusign-esign");
 
 const app  = express();
 const PORT = process.env.PORT || 8080;
@@ -177,6 +178,120 @@ app.get("/api/documents/:appointmentId", async (req, res) => {
     res.json({ success: true, documents: docs });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ── DOCUSIGN: OBTENER TOKEN ──────────────────────────────
+async function getDocuSignToken() {
+  const authApi = new docusign.AuthenticationApi();
+  const tokenUrl = process.env.DOCUSIGN_BASE_URI + "/oauth/token";
+  const credentials = Buffer.from(
+    process.env.DOCUSIGN_INTEGRATION_KEY + ":" + process.env.DOCUSIGN_SECRET_KEY
+  ).toString("base64");
+
+  const response = await fetch(tokenUrl, {
+    method: "POST",
+    headers: {
+      "Authorization": "Basic " + credentials,
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: "grant_type=client_credentials&scope=signature"
+  });
+  const data = await response.json();
+  return data.access_token;
+}
+
+// ── DOCUSIGN: ENVIAR SOBRE PARA FIRMA ────────────────────
+// POST /api/docusign/send
+// Body: { appointmentId, clientName, clientEmail, documentUrl, documentName }
+app.post("/api/docusign/send", async (req, res) => {
+  try {
+    const { appointmentId, clientName, clientEmail, documentUrl, documentName } = req.body;
+
+    if (!clientEmail) return res.status(400).json({ error: "Se requiere email del cliente" });
+
+    // Descargar documento de Cloudinary
+    const docResponse = await fetch(documentUrl);
+    const docBuffer = await docResponse.arrayBuffer();
+    const docBase64 = Buffer.from(docBuffer).toString("base64");
+    const ext = documentUrl.split(".").pop().toLowerCase();
+    const mimeType = ext === "pdf" ? "application/pdf" : "image/jpeg";
+
+    // Configurar DocuSign
+    const dsClient = new docusign.ApiClient();
+    dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");
+
+    // Usar JWT o credenciales básicas
+    const credentials = Buffer.from(
+      process.env.DOCUSIGN_INTEGRATION_KEY + ":" + process.env.DOCUSIGN_SECRET_KEY
+    ).toString("base64");
+
+    const tokenResponse = await fetch(process.env.DOCUSIGN_BASE_URI + "/oauth/token", {
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + credentials,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: "grant_type=client_credentials&scope=signature impersonation"
+    });
+    const tokenData = await tokenResponse.json();
+
+    if (!tokenData.access_token) {
+      return res.status(401).json({ error: "No se pudo obtener token de DocuSign", details: tokenData });
+    }
+
+    dsClient.addDefaultHeader("Authorization", "Bearer " + tokenData.access_token);
+
+    // Crear documento
+    const document = docusign.Document.constructFromObject({
+      documentBase64: docBase64,
+      name: documentName || "Documento",
+      fileExtension: ext,
+      documentId: "1"
+    });
+
+    // Crear firmante
+    const signer = docusign.Signer.constructFromObject({
+      email: clientEmail,
+      name: clientName,
+      recipientId: "1",
+      routingOrder: "1",
+      tabs: docusign.Tabs.constructFromObject({
+        signHereTabs: [
+          docusign.SignHere.constructFromObject({
+            documentId: "1",
+            pageNumber: "1",
+            xPosition: "100",
+            yPosition: "700"
+          })
+        ]
+      })
+    });
+
+    // Crear sobre
+    const envelope = docusign.EnvelopeDefinition.constructFromObject({
+      emailSubject: "Seal Services — Documento para firmar: " + (documentName || "Documento"),
+      documents: [document],
+      recipients: docusign.Recipients.constructFromObject({ signers: [signer] }),
+      status: "sent"
+    });
+
+    const envelopesApi = new docusign.EnvelopesApi(dsClient);
+    const result = await envelopesApi.createEnvelope(
+      process.env.DOCUSIGN_ACCOUNT_ID,
+      { envelopeDefinition: envelope }
+    );
+
+    res.json({
+      success: true,
+      envelopeId: result.envelopeId,
+      status: result.status,
+      message: "Documento enviado a " + clientEmail + " para firma"
+    });
+
+  } catch (err) {
+    console.error("DocuSign error:", err);
+    res.status(500).json({ error: err.message || "Error al enviar documento" });
   }
 });
 

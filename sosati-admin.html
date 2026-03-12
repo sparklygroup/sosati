@@ -694,8 +694,9 @@ function showToast(msg, type = "info") {
       <div id="docs-modal-body" style="min-height:100px;text-align:center;color:var(--gray-400)">
         Cargando documentos...
       </div>
-      <div style="margin-top:16px;text-align:right">
-        <button onclick="printDocs()" style="background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">🖨️ Imprimir todo</button>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+        <button onclick="printDocs()" style="background:var(--gray-100);color:var(--gray-700);border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">🖨️ Imprimir</button>
+        <button onclick="sendForSignature()" style="background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">✍️ Enviar para firmar</button>
       </div>
     </div>
   </div>
@@ -770,6 +771,65 @@ function printDocs() {
 document.getElementById('docs-modal').addEventListener('click', function(e){
   if (e.target === this) closeDocsModal();
 });
+
+async function sendForSignature() {
+  var apptId = document.getElementById('docs-modal-id').textContent;
+  var clientName = document.getElementById('docs-modal-title').textContent.replace('📎 Documentos — ', '');
+
+  // Get appointment email
+  var all = SOSATI.storage.getAll();
+  var appt = all.find(function(a){ return a.id === apptId; });
+  var clientEmail = appt ? appt.email : '';
+
+  if (!clientEmail) {
+    var email = prompt('El cliente no tiene email registrado. Ingresa el email para enviar el documento:');
+    if (!email) return;
+    clientEmail = email;
+  }
+
+  // Get image docs
+  var imgDocs = currentDocs.filter(function(d){ return /\.(jpg|jpeg|png|webp)$/i.test(d.url); });
+  var allDocs = currentDocs;
+
+  if (!allDocs.length) {
+    showToast('No hay documentos para enviar', 'error');
+    return;
+  }
+
+  // Let admin pick which doc to send
+  var doc = allDocs[0]; // Send first doc by default
+  if (allDocs.length > 1) {
+    var options = allDocs.map(function(d, i){ return (i+1) + '. ' + d.url.split('/').pop(); }).join('\n');
+    var pick = prompt('¿Cuál documento enviar para firma?\n' + options + '\n\nIngresa el número:');
+    if (pick && parseInt(pick) > 0 && parseInt(pick) <= allDocs.length) {
+      doc = allDocs[parseInt(pick) - 1];
+    }
+  }
+
+  showToast('Enviando documento a ' + clientEmail + '...', 'info');
+
+  try {
+    const res = await fetch('/api/docusign/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        appointmentId: apptId,
+        clientName: clientName,
+        clientEmail: clientEmail,
+        documentUrl: doc.url,
+        documentName: doc.url.split('/').pop()
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Documento enviado a ' + clientEmail + ' para firma', 'success');
+    } else {
+      showToast('Error: ' + (data.error || 'No se pudo enviar'), 'error');
+    }
+  } catch(err) {
+    showToast('Error al enviar: ' + err.message, 'error');
+  }
+}
 </script>
 </body>
 </html>
