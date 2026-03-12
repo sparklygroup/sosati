@@ -696,6 +696,10 @@ function showToast(msg, type = "info") {
       </div>
       <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
         <button onclick="printDocs()" style="background:var(--gray-100);color:var(--gray-700);border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">🖨️ Imprimir</button>
+        <label style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px">
+          📤 Subir documento
+          <input type="file" id="admin-upload-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="adminUploadDoc(this)">
+        </label>
         <button onclick="sendForSignature()" style="background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">✍️ Enviar para firmar</button>
       </div>
     </div>
@@ -771,6 +775,36 @@ function printDocs() {
 document.getElementById('docs-modal').addEventListener('click', function(e){
   if (e.target === this) closeDocsModal();
 });
+
+async function adminUploadDoc(input) {
+  var apptId = document.getElementById('docs-modal-id').textContent;
+  var clientName = document.getElementById('docs-modal-title').textContent.replace('📎 Documentos — ', '');
+  var file = input.files[0];
+  if (!file) return;
+
+  showToast('Subiendo documento...', 'info');
+
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('appointmentId', apptId);
+  formData.append('clientName', clientName);
+  formData.append('docType', 'admin-doc');
+
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Documento subido correctamente', 'success');
+      // Reload docs
+      await viewDocs(apptId, clientName);
+    } else {
+      showToast('Error: ' + (data.error || 'No se pudo subir'), 'error');
+    }
+  } catch(err) {
+    showToast('Error al subir: ' + err.message, 'error');
+  }
+  input.value = '';
+}
 
 async function sendForSignature() {
   var apptId = document.getElementById('docs-modal-id').textContent;
