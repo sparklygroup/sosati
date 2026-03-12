@@ -297,6 +297,28 @@ app.post("/api/docusign/send", async (req, res) => {
   }
 });
 
+// ── API: BORRAR DOCUMENTO ────────────────────────────────
+app.delete("/api/documents/:publicId", async (req, res) => {
+  try {
+    const publicId = decodeURIComponent(req.params.publicId);
+    // Try both image and raw resource types
+    let result;
+    try {
+      result = await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+    } catch(e) {
+      result = await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
+    }
+    if (result.result === "ok" || result.result === "not found") {
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: "No se pudo borrar", result });
+    }
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── API: HEALTH CHECK ─────────────────────────────────────
 app.get("/api/health", (req, res) => {
   res.json({

@@ -730,20 +730,29 @@ async function viewDocs(apptId, clientName) {
     const html = currentDocs.map(function(doc, i) {
       var isImg = /\.(jpg|jpeg|png|webp)$/i.test(doc.url);
       var kb = Math.round(doc.size / 1024);
+      var fname = doc.url.split('/').pop();
+      // Fix PDF URL: Cloudinary PDFs need /raw/upload/ not /image/upload/
+      var openUrl = doc.url;
+      if (!isImg) {
+        openUrl = doc.url.replace('/image/upload/', '/raw/upload/');
+      }
+      var deleteBtn = '<button onclick="deleteDoc(\'' + doc.publicId + '\', ' + i + ')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:600">🗑️</button>';
       if (isImg) {
         return '<div style="margin-bottom:16px;border:1px solid #eee;border-radius:12px;overflow:hidden">' +
           '<img src="' + doc.url + '" style="width:100%;display:block;cursor:pointer" onclick="window.open(\'' + doc.url + '\',\'_blank\')" />' +
           '<div style="padding:8px 12px;background:#f9f9f9;display:flex;justify-content:space-between;align-items:center">' +
           '<span style="font-size:12px;color:#666">🖼️ Imagen · ' + kb + ' KB</span>' +
-          '<a href="' + doc.url + '" target="_blank" style="font-size:12px;color:var(--brand);font-weight:600">Ver original ↗</a>' +
-          '</div></div>';
+          '<div style="display:flex;gap:8px;align-items:center">' +
+          '<a href="' + doc.url + '" target="_blank" style="font-size:12px;color:var(--brand);font-weight:600">Ver ↗</a>' +
+          deleteBtn + '</div></div></div>';
       } else {
         return '<div style="margin-bottom:12px;padding:14px;border:1px solid #eee;border-radius:10px;display:flex;align-items:center;gap:12px">' +
           '<span style="font-size:28px">📄</span>' +
-          '<div style="flex:1"><div style="font-weight:600;font-size:14px">Documento PDF</div>' +
+          '<div style="flex:1"><div style="font-weight:600;font-size:14px">' + fname + '</div>' +
           '<div style="font-size:12px;color:#999">' + kb + ' KB</div></div>' +
-          '<a href="' + doc.url + '" target="_blank" style="background:var(--brand);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">Abrir ↗</a>' +
-          '</div>';
+          '<div style="display:flex;gap:8px">' +
+          '<a href="' + openUrl + '" target="_blank" style="background:var(--brand);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">Abrir ↗</a>' +
+          deleteBtn + '</div></div>';
       }
     }).join('');
 
@@ -775,6 +784,25 @@ function printDocs() {
 document.getElementById('docs-modal').addEventListener('click', function(e){
   if (e.target === this) closeDocsModal();
 });
+
+async function deleteDoc(publicId, index) {
+  if (!confirm('¿Borrar este documento?')) return;
+  try {
+    const res = await fetch('/api/documents/' + encodeURIComponent(publicId), { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      currentDocs.splice(index, 1);
+      showToast('Documento eliminado', 'success');
+      var apptId = document.getElementById('docs-modal-id').textContent;
+      var clientName = document.getElementById('docs-modal-title').textContent.replace('📎 Documentos — ', '');
+      await viewDocs(apptId, clientName);
+    } else {
+      showToast('Error al borrar: ' + (data.error || 'No se pudo borrar'), 'error');
+    }
+  } catch(err) {
+    showToast('Error: ' + err.message, 'error');
+  }
+}
 
 async function adminUploadDoc(input) {
   var apptId = document.getElementById('docs-modal-id').textContent;
