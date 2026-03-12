@@ -187,11 +187,15 @@ async function getDocuSignJWTToken() {
   dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");
   dsClient.setOAuthBasePath(process.env.DOCUSIGN_BASE_URI.replace("https://", ""));
 
-  // Reconstruct private key with proper line breaks
+  // Reconstruct private key with proper line breaks (Railway stores as single line)
   const privateKeyRaw = process.env.DOCUSIGN_PRIVATE_KEY || "";
-  const privateKey = privateKeyRaw.includes("-----BEGIN") 
-    ? privateKeyRaw 
-    : "-----BEGIN RSA PRIVATE KEY-----\n" + privateKeyRaw + "\n-----END RSA PRIVATE KEY-----";
+  let privateKey;
+  if (privateKeyRaw.includes("-----BEGIN RSA PRIVATE KEY-----")) {
+    privateKey = privateKeyRaw.replace(/\\n/g, "\n");
+  } else {
+    const body = privateKeyRaw.match(/.{1,64}/g).join("\n");
+    privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" + body + "\n-----END RSA PRIVATE KEY-----\n";
+  }
 
   const results = await dsClient.requestJWTUserToken(
     process.env.DOCUSIGN_INTEGRATION_KEY,
