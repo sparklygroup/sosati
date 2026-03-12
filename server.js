@@ -225,7 +225,7 @@ app.post("/api/docusign/send", async (req, res) => {
     dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");
     dsClient.addDefaultHeader("Authorization", "Bearer " + accessToken);
 
-    // Generar URL firmada de Cloudinary
+    // Generar URL correcta de Cloudinary segun tipo de archivo
     const ext = documentUrl.split(".").pop().toLowerCase().split("?")[0];
     const fileExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "pdf";
     const urlParts = documentUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
@@ -233,6 +233,7 @@ app.post("/api/docusign/send", async (req, res) => {
     if (urlParts) {
       const publicId = urlParts[1];
       const resourceType = fileExt === "pdf" ? "raw" : "image";
+      // Use signed URL with correct resource type
       fetchUrl = cloudinary.url(publicId, {
         resource_type: resourceType,
         sign_url: true,
@@ -240,11 +241,14 @@ app.post("/api/docusign/send", async (req, res) => {
         format: fileExt
       });
     }
-    console.log("Fetching doc from:", fetchUrl.substring(0, 80));
+    console.log("Fetching doc from:", fetchUrl.substring(0, 100));
     const docResponse = await fetch(fetchUrl);
-    console.log("Doc fetch status:", docResponse.status);
+    console.log("Doc fetch status:", docResponse.status, "content-type:", docResponse.headers.get("content-type"));
     const docBuffer = await docResponse.arrayBuffer();
     console.log("Doc buffer size:", docBuffer.byteLength);
+    if (docBuffer.byteLength === 0) {
+      return res.status(400).json({ error: "No se pudo descargar el documento de Cloudinary" });
+    }
     const docBase64 = Buffer.from(docBuffer).toString("base64");
 
     // Crear documento
