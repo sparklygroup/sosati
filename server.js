@@ -263,6 +263,8 @@ app.post("/api/docusign/send", async (req, res) => {
       status: "sent"
     });
 
+    console.log("DocuSign accountId:", process.env.DOCUSIGN_ACCOUNT_ID);
+    console.log("DocuSign basePath:", process.env.DOCUSIGN_BASE_URI + "/restapi");
     const envelopesApi = new docusign.EnvelopesApi(dsClient);
     const result = await envelopesApi.createEnvelope(
       process.env.DOCUSIGN_ACCOUNT_ID,
