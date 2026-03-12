@@ -12,10 +12,15 @@ const app  = express();
 const PORT = process.env.PORT || 8080;
 
 // ── SUPABASE ──────────────────────────────────────────────
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_KEY || "";
+let supabase = null;
+if (supabaseUrl && supabaseKey) {
+  supabase = createClient(supabaseUrl, supabaseKey);
+  console.log("Supabase: Conectado");
+} else {
+  console.warn("Supabase: No configurado - usando modo local");
+}
 
 // ── CLOUDINARY ────────────────────────────────────────────
 cloudinary.config({
@@ -49,6 +54,7 @@ app.get("/admin",       (req, res) => res.sendFile(path.join(__dirname, "sosati-
 app.post("/api/appointments", async (req, res) => {
   try {
     const appt = req.body;
+    if (!supabase) throw new Error('Supabase no configurado');
     const { data, error } = await supabase
       .from("appointments")
       .insert([{
