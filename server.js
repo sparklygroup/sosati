@@ -205,6 +205,7 @@ async function getDocuSignJWTToken() {
     privateKey,
     3600
   );
+  console.log("DocuSign token OK");
   return results.body.access_token;
 }
 
@@ -215,7 +216,9 @@ app.post("/api/docusign/send", async (req, res) => {
     if (!clientEmail) return res.status(400).json({ error: "Se requiere email del cliente" });
 
     // Obtener token JWT
+    console.log("Getting DocuSign token...");
     const accessToken = await getDocuSignJWTToken();
+    console.log("Token obtained:", accessToken ? "YES" : "NO");
 
     // Configurar cliente
     const dsClient = new docusign.ApiClient();
