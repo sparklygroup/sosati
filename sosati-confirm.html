@@ -326,7 +326,7 @@
   <div class="success-hero">
     <div class="success-checkmark">✅</div>
     <h2>¡Cita Agendada!</h2>
-    <p>Te esperamos en Seal Services · Fresno, CA</p>
+    <p>Te esperamos en Seal Services, Fresno CA</p>
   </div>
 
   <div class="detail-card" id="detail-card"></div>
@@ -418,19 +418,23 @@
   function renderDetails(appt) {
     var serviceObj = SOSATI.config.services.find(function(s){ return s.id === appt.service; });
     var icon = serviceObj ? serviceObj.icon : "🛠️";
+    var mapsLinks = {
+      belmont: "https://maps.google.com/?q=3270+E+Belmont+Ave+Fresno+CA+93702",
+      ventura: "https://maps.google.com/?q=3259+E+Ventura+Blvd+Fresno+CA+93702",
+      kings:   "https://maps.google.com/?q=4244+E+Kings+Canyon+Rd+Fresno+CA+93702"
+    };
+    var mapsUrl = mapsLinks[appt.location] || "";
     var rows = [
-      { icon: "👤", label: "Nombre",   value: appt.name },
-      { icon: "📞", label: "Teléfono", value: appt.phone },
-      { icon: icon, label: "Servicio", value: appt.serviceLabel },
-      { icon: "📅", label: "Fecha",    value: SOSATI.utils.formatDate(appt.date) },
-      { icon: "🕐", label: "Horario",  value: appt.time },
-      { icon: "📍", label: "Oficina",  value: appt.locationLabel }
+      { label: "Nombre",   value: appt.name },
+      { label: "Teléfono", value: appt.phone },
+      { label: "Servicio", value: appt.serviceLabel },
+      { label: "Fecha",    value: SOSATI.utils.formatDate(appt.date) },
+      { label: "Horario",  value: appt.time },
+      { label: "Oficina",  value: mapsUrl ? '<a href="' + mapsUrl + '" target="_blank" style="color:var(--brand);font-weight:600;text-decoration:none;">' + appt.locationLabel + ' ↗</a>' : appt.locationLabel }
     ];
-    if (appt.notes) rows.push({ icon: "📝", label: "Notas", value: appt.notes });
 
     document.getElementById("detail-card").innerHTML = rows.map(function(r) {
       return '<div class="detail-row">' +
-        '<div class="detail-icon">' + r.icon + '</div>' +
         '<div><div class="detail-label">' + r.label + '</div>' +
         '<div class="detail-value">' + r.value + '</div></div>' +
         '</div>';
