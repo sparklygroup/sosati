@@ -299,15 +299,15 @@
       width: calc(100% - 32px);
       max-width: 448px;
       margin: 16px auto 0;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.95);
       border-radius: var(--radius-md);
       padding: 14px 16px;
       animation: fadeUp 0.5s 0.45s ease both;
     }
 
-    .reminder-box p { font-size: 12.5px; color: rgba(255,255,255,0.85); line-height: 1.6; }
-    .reminder-box strong { color: var(--white); }
+    .reminder-box p { font-size: 12.5px; color: var(--gray-600); line-height: 1.6; }
+    .reminder-box strong { color: var(--brand); }
+    .reminder-box a { color: var(--brand); font-weight: 700; }
 
     @keyframes popIn {
       0%   { transform: scale(0); opacity: 0; }
@@ -344,24 +344,24 @@
   <!-- UPLOAD SECTION -->
   <div class="upload-section">
     <div class="upload-card">
-      <div class="upload-title">📎 Sube tus documentos</div>
+      <div class="upload-title">↑ Sube tus documentos</div>
       <div class="upload-subtitle">Opcional — facilita tu cita subiendo tus documentos antes de llegar</div>
 
       <!-- Tipo de documento -->
       <div class="doc-type-grid" id="doc-type-grid">
-        <button class="doc-type-btn selected" data-type="id" onclick="selectDocType('id', this)">🪪 ID / Licencia</button>
-        <button class="doc-type-btn" data-type="tax" onclick="selectDocType('tax', this)">📋 Forma de impuestos</button>
-        <button class="doc-type-btn" data-type="insurance" onclick="selectDocType('insurance', this)">🛡️ Tarjeta de seguro</button>
-        <button class="doc-type-btn" data-type="other" onclick="selectDocType('other', this)">📄 Otro documento</button>
+        <button class="doc-type-btn selected" data-type="id" onclick="selectDocType('id', this)">ID / Licencia</button>
+        <button class="doc-type-btn" data-type="tax" onclick="selectDocType('tax', this)">Forma de impuestos</button>
+        <button class="doc-type-btn" data-type="insurance" onclick="selectDocType('insurance', this)">Tarjeta de seguro</button>
+        <button class="doc-type-btn" data-type="other" onclick="selectDocType('other', this)">Otro documento</button>
       </div>
 
       <!-- Botones de subida -->
       <div class="upload-buttons">
         <button class="upload-btn upload-btn-camera" onclick="openCamera()">
-          📷 Tomar foto
+          Tomar foto
         </button>
         <button class="upload-btn upload-btn-file" onclick="openGallery()">
-          📁 Seleccionar archivo
+          Seleccionar archivo
         </button>
       </div>
 
@@ -387,9 +387,9 @@
 
   <div class="reminder-box">
     <p>
-      📌 <strong>Recuerda:</strong> Llega 10 minutos antes de tu cita.<br>
-      Si necesitas cancelar o cambiar tu horario, llámanos al
-      <strong>(559) 266-6555</strong> con anticipación.
+      <strong>Te esperamos.</strong> Te recomendamos llegar 10 minutos antes.<br>
+      Para cancelar o cambiar tu horario llámanos con anticipación:<br>
+      <a href="tel:5592666555">(559) 266-6555</a>
     </p>
   </div>
 
@@ -453,7 +453,54 @@
   }
 
   function openCamera() {
-    document.getElementById("file-camera").click();
+    // Use getUserMedia for better camera support on iOS/PWA
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Create a modal with live camera preview
+      var modal = document.createElement("div");
+      modal.id = "camera-modal";
+      modal.style.cssText = "position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;";
+      modal.innerHTML = '<video id="cam-video" autoplay playsinline style="width:100%;max-height:70vh;object-fit:cover;"></video>' +
+        '<div style="display:flex;gap:16px;padding:20px;">' +
+        '<button onclick="capturePhoto()" style="background:var(--brand);color:#fff;border:none;border-radius:50px;padding:14px 32px;font-size:16px;font-weight:700;cursor:pointer;">📸 Capturar</button>' +
+        '<button onclick="closeCamera()" style="background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:50px;padding:14px 24px;font-size:16px;cursor:pointer;">Cancelar</button>' +
+        '</div>' +
+        '<canvas id="cam-canvas" style="display:none;"></canvas>';
+      document.body.appendChild(modal);
+
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(function(stream) {
+          window._camStream = stream;
+          document.getElementById("cam-video").srcObject = stream;
+        })
+        .catch(function() {
+          closeCamera();
+          document.getElementById("file-camera").click();
+        });
+    } else {
+      document.getElementById("file-camera").click();
+    }
+  }
+
+  function capturePhoto() {
+    var video = document.getElementById("cam-video");
+    var canvas = document.getElementById("cam-canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.toBlob(function(blob) {
+      var file = new File([blob], "foto-" + Date.now() + ".jpg", { type: "image/jpeg" });
+      closeCamera();
+      uploadFile(file);
+    }, "image/jpeg", 0.9);
+  }
+
+  function closeCamera() {
+    if (window._camStream) {
+      window._camStream.getTracks().forEach(function(t){ t.stop(); });
+      window._camStream = null;
+    }
+    var modal = document.getElementById("camera-modal");
+    if (modal) modal.remove();
   }
 
   function openGallery() {
