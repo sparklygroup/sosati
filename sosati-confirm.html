@@ -18,10 +18,9 @@
       padding: 0 0 80px;
     }
 
-    /* HERO SUCCESS */
     .success-hero {
       width: 100%;
-      background: linear-gradient(160deg, var(--brand) 0%, var(--brand-light) 100%);
+      background: linear-gradient(160deg, var(--brand-dark) 0%, var(--brand-light) 100%);
       padding: 48px 24px 36px;
       text-align: center;
       position: relative;
@@ -33,15 +32,6 @@
       position: absolute;
       top: -60px; right: -60px;
       width: 200px; height: 200px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-    }
-
-    .success-hero::after {
-      content: '';
-      position: absolute;
-      bottom: -40px; left: -40px;
-      width: 150px; height: 150px;
       border-radius: 50%;
       background: rgba(255,255,255,0.05);
     }
@@ -74,7 +64,6 @@
       animation: fadeUp 0.5s 0.3s ease both;
     }
 
-    /* DETAIL CARD */
     .detail-card {
       width: calc(100% - 32px);
       max-width: 448px;
@@ -123,7 +112,6 @@
       line-height: 1.4;
     }
 
-    /* CONFIRMATION ID */
     .conf-id-box {
       width: calc(100% - 32px);
       max-width: 448px;
@@ -166,7 +154,193 @@
 
     .copy-btn:hover { background: var(--brand-dark); }
 
-    /* ACTIONS */
+    /* ── UPLOAD SECTION ─────────────────────────────────── */
+    .upload-section {
+      width: calc(100% - 32px);
+      max-width: 448px;
+      margin: 0 auto 16px;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+
+    .upload-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 22px 22px 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .upload-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 17px;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+
+    .upload-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #22c55e;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .upload-arrow svg { width: 16px; height: 16px; }
+
+    .upload-subtitle {
+      font-size: 12.5px;
+      color: var(--gray-500);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .upload-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+      margin-top: 16px;
+    }
+
+    .upload-doclist {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .doclist-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--gray-400);
+      margin-bottom: 8px;
+    }
+
+    .doclist-items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .doclist-items li {
+      font-size: 13px;
+      color: var(--gray-600);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .doclist-items li::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .upload-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .upload-btn-big {
+      flex: 1;
+      background: var(--brand);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 16px 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+      min-height: 90px;
+    }
+
+    .upload-btn-big:active { opacity: 0.85; transform: scale(0.97); }
+
+    .upload-btn-icon { width: 52px; height: 52px; }
+
+    .upload-btn-small {
+      background: var(--brand-soft);
+      color: var(--brand);
+      border: 1.5px solid var(--brand);
+      border-radius: var(--radius-md);
+      padding: 11px 10px;
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .upload-btn-small:active { opacity: 0.85; }
+
+    /* Uploaded files list */
+    .uploaded-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .uploaded-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--gray-50);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-100);
+      animation: fadeUp 0.3s ease;
+    }
+
+    .uploaded-item .file-icon { font-size: 20px; }
+    .uploaded-item .file-name { font-size: 12.5px; font-weight: 600; color: var(--gray-800); flex: 1; }
+    .uploaded-item .file-size { font-size: 11px; color: var(--gray-400); }
+    .uploaded-item .file-check { color: var(--success); font-size: 16px; }
+
+    .upload-progress {
+      height: 4px;
+      background: var(--gray-100);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .upload-progress-bar {
+      height: 100%;
+      background: var(--brand);
+      border-radius: 2px;
+      animation: progressAnim 1.5s ease infinite;
+    }
+
+    @keyframes progressAnim {
+      0%   { width: 0%; }
+      50%  { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    /* Actions */
     .actions-area {
       width: calc(100% - 32px);
       max-width: 448px;
@@ -174,53 +348,101 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      animation: fadeUp 0.5s 0.35s ease both;
+      animation: fadeUp 0.5s 0.4s ease both;
     }
 
-    /* REMINDER BOX */
     .reminder-box {
       width: calc(100% - 32px);
       max-width: 448px;
       margin: 16px auto 0;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.95);
       border-radius: var(--radius-md);
       padding: 14px 16px;
-      animation: fadeUp 0.5s 0.4s ease both;
+      animation: fadeUp 0.5s 0.45s ease both;
     }
 
-    .reminder-box p {
-      font-size: 12.5px;
-      color: rgba(255,255,255,0.85);
-      line-height: 1.6;
-    }
-
-    .reminder-box strong { color: var(--white); }
+    .reminder-box p { font-size: 12.5px; color: var(--gray-600); line-height: 1.6; }
+    .reminder-box strong { color: var(--brand); }
+    .reminder-box a { color: var(--brand); font-weight: 700; }
 
     @keyframes popIn {
       0%   { transform: scale(0); opacity: 0; }
       60%  { transform: scale(1.15); }
       100% { transform: scale(1); opacity: 1; }
     }
+
+    .upload-security {
+      font-size: 11px;
+      color: #16a34a;
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .doclist-note {
+      font-size: 10.5px;
+      color: var(--gray-400);
+      font-style: italic;
+      margin-bottom: 8px;
+      margin-top: -4px;
+    }
+
+    .upload-or {
+      font-size: 11px;
+      color: var(--gray-500);
+      text-align: center;
+      padding: 2px 0 4px;
+      font-style: italic;
+      font-weight: 500;
+    }
+
+    .upload-btn-small-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .upload-security-footer {
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      font-size: 10.5px;
+      color: #16a34a;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--gray-100);
+      line-height: 1.4;
+    }
+
+    .doclist-reqlink {
+      font-size: 11px;
+      color: var(--brand);
+      font-weight: 600;
+      text-decoration: none;
+      margin-top: 8px;
+      display: inline-block;
+      opacity: 0.7;
+    }
+    .doclist-reqlink:hover { opacity: 1; }
+
+    /* Hidden file inputs */
+    #file-camera, #file-gallery { display: none; }
   </style>
 </head>
 <body>
 
 <div class="confirm-wrapper">
 
-  <!-- SUCCESS HERO -->
   <div class="success-hero">
     <div class="success-checkmark">✅</div>
     <h2>¡Cita Agendada!</h2>
-    <p>Te esperamos en Seal Services · Fresno, CA</p>
+    <p>Seal Services &middot; Fresno, CA</p>
   </div>
 
-  <!-- DETAIL CARD -->
-  <div class="detail-card" id="detail-card">
-    <!-- generado por JS -->
-  </div>
+  <div class="detail-card" id="detail-card"></div>
 
-  <!-- CONFIRMATION ID -->
   <div class="conf-id-box">
     <div class="conf-id-inner">
       <div>
@@ -231,88 +453,273 @@
     </div>
   </div>
 
+  <!-- UPLOAD SECTION -->
+  <div class="upload-section">
+    <div class="upload-card">
+      <div class="upload-title-row">
+        <span class="upload-arrow">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 13V3M8 3L4 7M8 3l4 4" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>Sube tus documentos</span>
+      </div>
+      <div class="upload-subtitle">Ahorra tiempo subiendo tus documentos</div>
+
+
+      <div class="upload-layout">
+        <!-- LEFT: doc list by service -->
+        <div class="upload-doclist">
+          <div class="doclist-title">Documentos</div>
+          <div class="doclist-note">Varían según el trámite</div>
+          <a href="sosati-requisitos.html" class="doclist-reqlink">Ver todos los requisitos →</a>
+          <ul class="doclist-items" id="doclist-items"></ul>
+        </div>
+
+        <!-- RIGHT: camera + file buttons -->
+        <div class="upload-actions">
+          <button class="upload-btn-big" onclick="openCamera()">
+            <svg class="upload-btn-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13.5 7L11.5 10H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V12a2 2 0 0 0-2-2h-5.5L22.5 7h-9z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="18" cy="19" r="5.5" stroke="white" stroke-width="2"/>
+              <circle cx="28" cy="14" r="1.5" fill="white"/>
+            </svg>
+            <span>Tomar foto</span>
+          </button>
+          <div class="upload-btn-small-wrap">
+            <div class="upload-or">o sube desde tus fotos</div>
+            <button class="upload-btn-small" onclick="openGallery()">
+              Seleccionar archivo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security footer -->
+      <div class="upload-security-footer">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z" stroke="#16a34a" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 8l2 2 3-3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Almacenamiento cifrado y certificado por Cloudinary y DocuSign
+      </div>
+
+      <!-- Progress bar -->
+      <div class="upload-progress" id="upload-progress">
+        <div class="upload-progress-bar"></div>
+      </div>
+
+      <!-- Lista de archivos subidos -->
+      <div class="uploaded-list" id="uploaded-list"></div>
+    </div>
+  </div>
+
+  <div class="reminder-box">
+    <p>
+      Sugerimos llegar <strong>10 minutos antes</strong> de tu cita.<br>
+      Cambios o cancelaciones: <a href="tel:5592666555">(559) 266-6555</a>
+    </p>
+  </div>
+
   <!-- ACTIONS -->
   <div class="actions-area">
     <a href="tel:5592666555" class="btn btn-primary" style="text-align:center">
-      📞 Llamar a la oficina
+      Llamar a la oficina
     </a>
-    <a href="sosati-appointment.html" class="btn" style="background:rgba(255,255,255,0.15);color:white;text-align:center">
-      + Agendar otra cita
+    <a href="sosati-appointment.html" class="btn" style="background:rgba(255,255,255,0.15);color:white;text-align:center;font-size:14px;padding:14px">
+      Agendar otra cita
     </a>
-  </div>
-
-  <!-- REMINDER -->
-  <div class="reminder-box">
-    <p>
-      📌 <strong>Recuerda:</strong> Llega 10 minutos antes de tu cita.<br>
-      Si necesitas cancelar o cambiar tu horario, llámanos al
-      <strong>(559) 266-6555</strong> con anticipación.
-    </p>
   </div>
 
 </div>
 
-<!-- TOAST -->
+<!-- Hidden file inputs -->
+<input type="file" id="file-camera" accept="image/*" capture="environment" onchange="handleFile(this)" />
+<input type="file" id="file-gallery" accept="image/*,application/pdf" onchange="handleFile(this)" />
+
 <div id="sosati-toast"></div>
 
 <script src="sosati-core.js"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const raw = sessionStorage.getItem("sosati_last_appt");
-    if (!raw) {
-      // No hay cita — redirigir al formulario
-      window.location.href = "sosati-appointment.html";
-      return;
-    }
+  var currentAppt    = null;
+  var selectedDocType = "id";
+  var uploadedDocs   = [];
 
-    const appt = JSON.parse(raw);
-    renderDetails(appt);
-    document.getElementById("conf-id").textContent = appt.id;
+  document.addEventListener("DOMContentLoaded", function() {
+    var raw = sessionStorage.getItem("sosati_last_appt");
+    if (!raw) { window.location.href = "sosati-appointment.html"; return; }
+    currentAppt = JSON.parse(raw);
+    renderDetails(currentAppt);
+    document.getElementById("conf-id").textContent = currentAppt.id;
   });
 
   function renderDetails(appt) {
-    const serviceObj = SOSATI.config.services.find(s => s.id === appt.service);
-    const icon = serviceObj?.icon || "🛠️";
-
-    const rows = [
-      { icon: "👤", label: "Nombre",   value: appt.name },
-      { icon: "📞", label: "Teléfono", value: appt.phone },
-      { icon: icon, label: "Servicio", value: appt.serviceLabel },
-      { icon: "📅", label: "Fecha",    value: SOSATI.utils.formatDate(appt.date) },
-      { icon: "🕐", label: "Horario",  value: appt.time },
-      { icon: "📍", label: "Oficina",  value: appt.locationLabel }
+    var serviceObj = SOSATI.config.services.find(function(s){ return s.id === appt.service; });
+    var icon = serviceObj ? serviceObj.icon : "🛠️";
+    var mapsLinks = {
+      belmont: "https://maps.google.com/?q=3270+E+Belmont+Ave+Fresno+CA+93702",
+      ventura: "https://maps.google.com/?q=3259+E+Ventura+Blvd+Fresno+CA+93702",
+      kings:   "https://maps.google.com/?q=4244+E+Kings+Canyon+Rd+Fresno+CA+93702"
+    };
+    var mapsUrl = mapsLinks[appt.location] || "";
+    var rows = [
+      { label: "Nombre",   value: appt.name },
+      { label: "Teléfono", value: appt.phone },
+      { label: "Servicio", value: appt.serviceLabel },
+      { label: "Fecha",    value: SOSATI.utils.formatDate(appt.date) },
+      { label: "Horario",  value: appt.time },
+      { label: "Oficina",  value: mapsUrl ? '<a href="' + mapsUrl + '" target="_blank" style="color:var(--brand);font-weight:600;text-decoration:none;">' + appt.locationLabel + ' ↗</a>' : appt.locationLabel }
     ];
 
-    if (appt.notes) {
-      rows.push({ icon: "📝", label: "Notas", value: appt.notes });
-    }
+    document.getElementById("detail-card").innerHTML = rows.map(function(r) {
+      return '<div class="detail-row">' +
+        '<div><div class="detail-label">' + r.label + '</div>' +
+        '<div class="detail-value">' + r.value + '</div></div>' +
+        '</div>';
+    }).join("");
 
-    const card = document.getElementById("detail-card");
-    card.innerHTML = rows.map(r => `
-      <div class="detail-row">
-        <div class="detail-icon">${r.icon}</div>
-        <div>
-          <div class="detail-label">${r.label}</div>
-          <div class="detail-value">${r.value}</div>
-        </div>
-      </div>
-    `).join("");
+    // Smart doc list by service
+    var docsByService = {
+      tax:        ["ID / Licencia", "W-2 o W-9", "Formas de impuestos", "ITIN (si aplica)"],
+      accounting: ["ID / Licencia", "Estados de cuenta", "Registros financieros"],
+      dmv:        ["ID / Licencia", "Título del vehículo", "Prueba de seguro", "Placas actuales"],
+      insurance:  ["ID / Licencia", "Tarjeta de seguro actual", "Número de póliza"],
+      notary:     ["ID / Licencia", "Documento a notarizar"],
+      general:    ["ID / Licencia", "Documentos relacionados"]
+    };
+    var docs = docsByService[appt.service] || docsByService.general;
+    var docListEl = document.getElementById("doclist-items");
+    if (docListEl) {
+      docListEl.innerHTML = docs.map(function(d) {
+        return '<li>' + d + '</li>';
+      }).join("");
+    }
   }
 
   function copyId() {
-    const id = document.getElementById("conf-id").textContent;
-    navigator.clipboard?.writeText(id).then(() => {
-      showToast("Número copiado al portapapeles ✓", "success");
-    }).catch(() => {
+    var id = document.getElementById("conf-id").textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(id).then(function(){ showToast("Número copiado ✓", "success"); });
+    } else {
       showToast("ID: " + id, "info");
+    }
+  }
+
+
+  function openCamera() {
+    // Use getUserMedia for better camera support on iOS/PWA
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Create a modal with live camera preview
+      var modal = document.createElement("div");
+      modal.id = "camera-modal";
+      modal.style.cssText = "position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;";
+      modal.innerHTML = '<video id="cam-video" autoplay playsinline style="width:100%;max-height:70vh;object-fit:cover;"></video>' +
+        '<div style="display:flex;gap:16px;padding:20px;">' +
+        '<button onclick="capturePhoto()" style="background:var(--brand);color:#fff;border:none;border-radius:50px;padding:14px 32px;font-size:16px;font-weight:700;cursor:pointer;">📸 Capturar</button>' +
+        '<button onclick="closeCamera()" style="background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:50px;padding:14px 24px;font-size:16px;cursor:pointer;">Cancelar</button>' +
+        '</div>' +
+        '<canvas id="cam-canvas" style="display:none;"></canvas>';
+      document.body.appendChild(modal);
+
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(function(stream) {
+          window._camStream = stream;
+          document.getElementById("cam-video").srcObject = stream;
+        })
+        .catch(function() {
+          closeCamera();
+          document.getElementById("file-camera").click();
+        });
+    } else {
+      document.getElementById("file-camera").click();
+    }
+  }
+
+  function capturePhoto() {
+    var video = document.getElementById("cam-video");
+    var canvas = document.getElementById("cam-canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.toBlob(function(blob) {
+      var file = new File([blob], "foto-" + Date.now() + ".jpg", { type: "image/jpeg" });
+      closeCamera();
+      uploadFile(file);
+    }, "image/jpeg", 0.9);
+  }
+
+  function closeCamera() {
+    if (window._camStream) {
+      window._camStream.getTracks().forEach(function(t){ t.stop(); });
+      window._camStream = null;
+    }
+    var modal = document.getElementById("camera-modal");
+    if (modal) modal.remove();
+  }
+
+  function openGallery() {
+    document.getElementById("file-gallery").click();
+  }
+
+  function handleFile(input) {
+    var file = input.files[0];
+    if (!file) return;
+    uploadFile(file);
+    input.value = ""; // reset para permitir subir el mismo archivo de nuevo
+  }
+
+  function uploadFile(file) {
+    if (!currentAppt) { showToast("Error: no hay cita activa", "error"); return; }
+
+    var progress = document.getElementById("upload-progress");
+    progress.style.display = "block";
+
+    var formData = new FormData();
+    formData.append("file", file);
+    formData.append("appointmentId", currentAppt.id);
+    formData.append("clientName", currentAppt.name);
+    formData.append("docType", selectedDocType);
+
+    fetch("/api/upload", {
+      method: "POST",
+      body: formData
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(data) {
+      progress.style.display = "none";
+      if (data.success) {
+        addUploadedItem(file.name, file.size, data.url);
+        showToast("Documento subido correctamente ✓", "success");
+      } else {
+        showToast("Error: " + (data.error || "No se pudo subir"), "error");
+      }
+    })
+    .catch(function(err) {
+      progress.style.display = "none";
+      showToast("Error al subir el archivo", "error");
+      console.error(err);
     });
   }
 
-  function showToast(msg, type = "info") {
-    const t = document.getElementById("sosati-toast");
-    t.textContent = msg;
-    t.className = `show ${type}`;
-    setTimeout(() => { t.className = ""; }, 3000);
+  function addUploadedItem(name, size, url) {
+    var list = document.getElementById("uploaded-list");
+    var kb = Math.round(size / 1024);
+    var isImage = /\.(jpg|jpeg|png|webp)$/i.test(name);
+    var icon = isImage ? "🖼️" : "📄";
+
+    var div = document.createElement("div");
+    div.className = "uploaded-item";
+    div.innerHTML =
+      '<span class="file-icon">' + icon + '</span>' +
+      '<span class="file-name">' + name + '</span>' +
+      '<span class="file-size">' + kb + ' KB</span>' +
+      '<span class="file-check">✅</span>';
+    list.appendChild(div);
+    uploadedDocs.push(url);
+  }
+
+  function showToast(msg, type) {
+    type = type || "info";
+    var t = document.getElementById("sosati-toast");
+    t.textContent = msg; t.className = "show " + type;
+    setTimeout(function(){ t.className = ""; }, 3500);
   }
 </script>
 </body>
