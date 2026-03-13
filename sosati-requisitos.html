@@ -230,6 +230,26 @@
       transition: var(--transition);
     }
     .req-cta a:hover { opacity: 0.9; }
+    /* FOOTER */
+    .req-footer {
+      background: #1e40af;
+      text-align: center;
+      padding: 14px 20px;
+      margin-top: 8px;
+    }
+
+    .req-footer-link {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      opacity: 0.92;
+    }
+
+    .req-footer-link:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -426,5 +446,12 @@ function showPanel(id, btn) {
   btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
 </script>
+<div class="req-footer">
+  <a href="tel:5592666555" class="req-footer-link">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 2.5C2 2.5 3 1 4.5 1c.5 0 1 .5 1.5 1.5L7 5c.5 1 0 1.5-.5 2l-.5.5c.5 1 2 2.5 3 3l.5-.5c.5-.5 1-1 2-.5l2.5 1c1 .5 1.5 1 1.5 1.5 0 1.5-1.5 2.5-1.5 2.5C4 16 0 4 2 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    ¿Dudas? &nbsp;<strong>(559) 266-6555</strong>
+  </a>
+</div>
+
 </body>
 </html>
