@@ -169,74 +169,122 @@
       box-shadow: var(--shadow-sm);
     }
 
-    .upload-title {
+    .upload-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-family: var(--font-display);
       font-size: 17px;
       color: var(--brand);
       margin-bottom: 4px;
     }
 
-    .upload-subtitle {
-      font-size: 12.5px;
-      color: var(--gray-400);
-      margin-bottom: 18px;
+    .upload-arrow {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--brand);
     }
 
-    .doc-type-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+    .upload-subtitle {
+      font-size: 12px;
+      color: var(--gray-400);
       margin-bottom: 16px;
     }
 
-    .doc-type-btn {
-      padding: 10px 8px;
-      border: 1.5px solid var(--gray-200);
-      border-radius: var(--radius-md);
-      background: var(--white);
-      font-family: var(--font-body);
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--gray-600);
-      cursor: pointer;
-      transition: var(--transition);
-      text-align: center;
-    }
-
-    .doc-type-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-alpha); }
-    .doc-type-btn.selected { border-color: var(--brand); background: var(--brand); color: var(--white); }
-
-    .upload-buttons {
+    .upload-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 14px;
       margin-bottom: 14px;
     }
 
-    .upload-btn {
-      padding: 13px 10px;
-      border-radius: var(--radius-md);
-      font-family: var(--font-body);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: var(--transition);
-      text-align: center;
+    .upload-doclist {
+      display: flex;
+      flex-direction: column;
     }
 
-    .upload-btn-camera {
+    .doclist-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--gray-400);
+      margin-bottom: 8px;
+    }
+
+    .doclist-items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .doclist-items li {
+      font-size: 13px;
+      color: var(--gray-600);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .doclist-items li::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .upload-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .upload-btn-big {
+      flex: 1;
       background: var(--brand);
       color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 16px 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+      min-height: 90px;
     }
 
-    .upload-btn-file {
+    .upload-btn-big:active { opacity: 0.85; }
+
+    .upload-btn-icon { font-size: 28px; line-height: 1; }
+
+    .upload-btn-small {
       background: var(--brand-soft);
       color: var(--brand);
       border: 1.5px solid var(--brand);
+      border-radius: var(--radius-md);
+      padding: 11px 10px;
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
     }
 
-    .upload-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .upload-btn-small:active { opacity: 0.85; }
 
     /* Uploaded files list */
     .uploaded-list {
@@ -326,7 +374,7 @@
   <div class="success-hero">
     <div class="success-checkmark">✅</div>
     <h2>¡Cita Agendada!</h2>
-    <p>Te esperamos en Seal Services, Fresno CA</p>
+    <p>Seal Services &middot; Fresno, CA</p>
   </div>
 
   <div class="detail-card" id="detail-card"></div>
@@ -344,25 +392,29 @@
   <!-- UPLOAD SECTION -->
   <div class="upload-section">
     <div class="upload-card">
-      <div class="upload-title">↑ Sube tus documentos</div>
+      <div class="upload-title-row">
+        <span class="upload-arrow">↑</span>
+        <span>Sube tus documentos</span>
+      </div>
       <div class="upload-subtitle">Opcional — facilita tu cita subiendo tus documentos antes de llegar</div>
 
-      <!-- Tipo de documento -->
-      <div class="doc-type-grid" id="doc-type-grid">
-        <button class="doc-type-btn selected" data-type="id" onclick="selectDocType('id', this)">ID / Licencia</button>
-        <button class="doc-type-btn" data-type="tax" onclick="selectDocType('tax', this)">Forma de impuestos</button>
-        <button class="doc-type-btn" data-type="insurance" onclick="selectDocType('insurance', this)">Tarjeta de seguro</button>
-        <button class="doc-type-btn" data-type="other" onclick="selectDocType('other', this)">Otro documento</button>
-      </div>
+      <div class="upload-layout">
+        <!-- LEFT: doc list by service -->
+        <div class="upload-doclist">
+          <div class="doclist-title">Documentos</div>
+          <ul class="doclist-items" id="doclist-items"></ul>
+        </div>
 
-      <!-- Botones de subida -->
-      <div class="upload-buttons">
-        <button class="upload-btn upload-btn-camera" onclick="openCamera()">
-          Tomar foto
-        </button>
-        <button class="upload-btn upload-btn-file" onclick="openGallery()">
-          Seleccionar archivo
-        </button>
+        <!-- RIGHT: camera + file buttons -->
+        <div class="upload-actions">
+          <button class="upload-btn-big" onclick="openCamera()">
+            <span class="upload-btn-icon">📷</span>
+            <span>Tomar foto</span>
+          </button>
+          <button class="upload-btn-small" onclick="openGallery()">
+            Seleccionar archivo
+          </button>
+        </div>
       </div>
 
       <!-- Progress bar -->
@@ -439,6 +491,23 @@
         '<div class="detail-value">' + r.value + '</div></div>' +
         '</div>';
     }).join("");
+
+    // Smart doc list by service
+    var docsByService = {
+      tax:        ["ID / Licencia", "W-2 o W-9", "Formas de impuestos", "ITIN (si aplica)"],
+      accounting: ["ID / Licencia", "Estados de cuenta", "Registros financieros"],
+      dmv:        ["ID / Licencia", "Título del vehículo", "Prueba de seguro", "Placas actuales"],
+      insurance:  ["ID / Licencia", "Tarjeta de seguro actual", "Número de póliza"],
+      notary:     ["ID / Licencia", "Documento a notarizar"],
+      general:    ["ID / Licencia", "Documentos relacionados"]
+    };
+    var docs = docsByService[appt.service] || docsByService.general;
+    var docListEl = document.getElementById("doclist-items");
+    if (docListEl) {
+      docListEl.innerHTML = docs.map(function(d) {
+        return '<li>' + d + '</li>';
+      }).join("");
+    }
   }
 
   function copyId() {
@@ -450,11 +519,6 @@
     }
   }
 
-  function selectDocType(type, el) {
-    selectedDocType = type;
-    document.querySelectorAll(".doc-type-btn").forEach(function(b){ b.classList.remove("selected"); });
-    el.classList.add("selected");
-  }
 
   function openCamera() {
     // Use getUserMedia for better camera support on iOS/PWA
