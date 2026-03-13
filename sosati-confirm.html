@@ -180,11 +180,17 @@
     }
 
     .upload-arrow {
-      font-size: 24px;
-      font-weight: 900;
-      line-height: 1;
-      color: var(--brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #22c55e;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
+
+    .upload-arrow svg { width: 16px; height: 16px; }
 
     .upload-subtitle {
       font-size: 12px;
@@ -261,14 +267,14 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       transition: var(--transition);
       min-height: 90px;
     }
 
-    .upload-btn-big:active { opacity: 0.85; }
+    .upload-btn-big:active { opacity: 0.85; transform: scale(0.97); }
 
-    .upload-btn-icon { font-size: 28px; line-height: 1; }
+    .upload-btn-icon { width: 36px; height: 36px; }
 
     .upload-btn-small {
       background: var(--brand-soft);
@@ -393,7 +399,11 @@
   <div class="upload-section">
     <div class="upload-card">
       <div class="upload-title-row">
-        <span class="upload-arrow">↑</span>
+        <span class="upload-arrow">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 13V3M8 3L4 7M8 3l4 4" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
         <span>Sube tus documentos</span>
       </div>
       <div class="upload-subtitle">Opcional — facilita tu cita subiendo tus documentos antes de llegar</div>
@@ -408,7 +418,11 @@
         <!-- RIGHT: camera + file buttons -->
         <div class="upload-actions">
           <button class="upload-btn-big" onclick="openCamera()">
-            <span class="upload-btn-icon">📷</span>
+            <svg class="upload-btn-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13.5 7L11.5 10H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V12a2 2 0 0 0-2-2h-5.5L22.5 7h-9z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="18" cy="19" r="5.5" stroke="white" stroke-width="2"/>
+              <circle cx="28" cy="14" r="1.5" fill="white"/>
+            </svg>
             <span>Tomar foto</span>
           </button>
           <button class="upload-btn-small" onclick="openGallery()">
@@ -439,9 +453,8 @@
 
   <div class="reminder-box">
     <p>
-      <strong>Te esperamos.</strong> Te recomendamos llegar 10 minutos antes.<br>
-      Para cancelar o cambiar tu horario llámanos con anticipación:<br>
-      <a href="tel:5592666555">(559) 266-6555</a>
+      Sugerimos llegar <strong>10 minutos antes</strong> de tu cita.<br>
+      Cambios o cancelaciones: <a href="tel:5592666555">(559) 266-6555</a>
     </p>
   </div>
 
