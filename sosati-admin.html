@@ -279,6 +279,323 @@
     .modal-title { font-family: var(--font-display); font-size: 18px; color: var(--brand); margin-bottom: 8px; }
     .modal-text  { font-size: 14px; color: var(--gray-600); margin-bottom: 20px; }
     .modal-actions { display: flex; gap: 10px; }
+
+    /* ── TABS ───────────────────────────────────────────────── */
+    .admin-tabs {
+      display: flex;
+      align-items: center;
+      background: var(--white);
+      border-bottom: 2px solid var(--gray-100);
+      padding: 0 20px;
+      gap: 4px;
+      position: sticky;
+      top: 64px;
+      z-index: 90;
+    }
+
+    .admin-tab {
+      padding: 14px 20px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-400);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .admin-tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+    .admin-tab:hover { color: var(--brand); }
+
+    /* ── OFFICE GRID ────────────────────────────────────────── */
+    .office-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      padding: 20px 20px 0;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .office-grid { grid-template-columns: 1fr; }
+    }
+
+    .office-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100);
+    }
+
+    .office-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .office-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .office-name {
+      font-family: var(--font-display);
+      font-size: 16px;
+      color: var(--brand);
+      font-weight: 700;
+    }
+
+    .office-address {
+      width: 100%;
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: -4px;
+    }
+
+    .office-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .office-stat {
+      text-align: center;
+      background: var(--gray-50);
+      border-radius: 8px;
+      padding: 8px 4px;
+    }
+
+    .ostat-num {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--brand);
+      font-family: var(--font-display);
+      line-height: 1;
+    }
+
+    .ostat-num.green { color: #16a34a; }
+
+    .ostat-label {
+      display: block;
+      font-size: 10px;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-top: 3px;
+    }
+
+    .office-top-service {
+      font-size: 12px;
+      color: var(--gray-600);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .office-bar-wrap {
+      height: 5px;
+      background: var(--gray-100);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .office-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), #7c3aed);
+      border-radius: 99px;
+      transition: width 0.8s ease;
+    }
+
+    /* ── CONTROL CENTER ─────────────────────────────────────── */
+    .control-center {
+      margin: 16px 20px 20px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100);
+      overflow: hidden;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cc-header {
+      background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
+      padding: 18px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .cc-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .cc-subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .cc-body {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+    }
+
+    @media (max-width: 768px) {
+      .cc-body { grid-template-columns: 1fr; }
+    }
+
+    .cc-rankings {
+      padding: 20px;
+      border-right: 1px solid var(--gray-100);
+    }
+
+    .cc-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--gray-400);
+      margin-bottom: 10px;
+    }
+
+    .cc-rank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cc-rank-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cc-rank-pos {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--brand);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .cc-rank-pos.gold   { background: #f59e0b; }
+    .cc-rank-pos.silver { background: #94a3b8; }
+    .cc-rank-pos.bronze { background: #b45309; }
+
+    .cc-rank-info { flex: 1; }
+    .cc-rank-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .cc-rank-count { font-size: 11px; color: var(--gray-400); }
+
+    .cc-rank-arrow { font-size: 16px; }
+
+    .cc-star-service {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--brand);
+      font-family: var(--font-display);
+    }
+
+    .cc-total-profit {
+      font-size: 28px;
+      font-weight: 700;
+      color: #16a34a;
+      font-family: var(--font-display);
+      line-height: 1;
+    }
+
+    .cc-profit-sub {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 4px;
+    }
+
+    .cc-chart {
+      padding: 20px 24px;
+    }
+
+    .cc-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 140px;
+      margin-top: 12px;
+    }
+
+    .cc-bar-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .cc-bar-cols {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      width: 100%;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .cc-bar-col {
+      width: 10px;
+      border-radius: 3px 3px 0 0;
+      min-height: 3px;
+      transition: height 0.6s ease;
+    }
+
+    .cc-bar-col.loc-b { background: var(--brand); }
+    .cc-bar-col.loc-v { background: #7c3aed; }
+    .cc-bar-col.loc-k { background: #06b6d4; }
+
+    .cc-bar-month {
+      font-size: 10px;
+      color: var(--gray-400);
+      text-align: center;
+    }
+
+    .cc-legend {
+      display: flex;
+      gap: 14px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cc-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--gray-600);
+    }
+
+    .cc-legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
@@ -331,45 +648,116 @@
     <button class="logout-btn" onclick="doLogout()">Salir</button>
   </div>
 
-  <!-- STATS BAR -->
-  <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-num" id="stat-total">0</div>
-      <div class="stat-label">Total</div>
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" id="tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="admin-tab" id="tab-citas" onclick="switchTab('citas')">Citas</button>
+    <button class="refresh-btn" onclick="renderAll()" title="Actualizar" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.87 4.4 2.2L14 3v4h-4l1.5-1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+
+  <!-- TAB: DASHBOARD -->
+  <div id="tab-content-dashboard">
+    <!-- 3 office cards -->
+    <div class="office-grid">
+      <div class="office-card" id="office-belmont">
+        <div class="office-card-header">
+          <div class="office-dot"></div>
+          <div class="office-name">Belmont Ave</div>
+          <div class="office-address">3270 E. Belmont Ave</div>
+        </div>
+        <div class="office-stats">
+          <div class="office-stat"><span class="ostat-num" id="ob-today">0</span><span class="ostat-label">Hoy</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ob-week">0</span><span class="ostat-label">Semana</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ob-month">0</span><span class="ostat-label">Mes</span></div>
+          <div class="office-stat"><span class="ostat-num green" id="ob-profit">$0</span><span class="ostat-label">Estimado</span></div>
+        </div>
+        <div class="office-top-service" id="ob-top">— sin citas —</div>
+        <div class="office-bar-wrap"><div class="office-bar" id="ob-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="office-card" id="office-ventura">
+        <div class="office-card-header">
+          <div class="office-dot"></div>
+          <div class="office-name">Ventura Blvd</div>
+          <div class="office-address">3259 E. Ventura Blvd</div>
+        </div>
+        <div class="office-stats">
+          <div class="office-stat"><span class="ostat-num" id="ov-today">0</span><span class="ostat-label">Hoy</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ov-week">0</span><span class="ostat-label">Semana</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ov-month">0</span><span class="ostat-label">Mes</span></div>
+          <div class="office-stat"><span class="ostat-num green" id="ov-profit">$0</span><span class="ostat-label">Estimado</span></div>
+        </div>
+        <div class="office-top-service" id="ov-top">— sin citas —</div>
+        <div class="office-bar-wrap"><div class="office-bar" id="ov-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="office-card" id="office-kings">
+        <div class="office-card-header">
+          <div class="office-dot"></div>
+          <div class="office-name">Kings Canyon</div>
+          <div class="office-address">4244 E. Kings Canyon Rd</div>
+        </div>
+        <div class="office-stats">
+          <div class="office-stat"><span class="ostat-num" id="ok-today">0</span><span class="ostat-label">Hoy</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ok-week">0</span><span class="ostat-label">Semana</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ok-month">0</span><span class="ostat-label">Mes</span></div>
+          <div class="office-stat"><span class="ostat-num green" id="ok-profit">$0</span><span class="ostat-label">Estimado</span></div>
+        </div>
+        <div class="office-top-service" id="ok-top">— sin citas —</div>
+        <div class="office-bar-wrap"><div class="office-bar" id="ok-bar" style="width:0%"></div></div>
+      </div>
     </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div>
-      <div class="stat-label">Pendientes</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-confirmed" style="color:var(--success)">0</div>
-      <div class="stat-label">Confirmadas</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-today" style="color:var(--info)">0</div>
-      <div class="stat-label">Hoy</div>
+
+    <!-- CONTROL CENTER -->
+    <div class="control-center">
+      <div class="cc-header">
+        <div class="cc-title">Centro de Control</div>
+        <div class="cc-subtitle">Rendimiento comparativo · <span id="cc-month-label"></span></div>
+      </div>
+      <div class="cc-body">
+        <!-- Left: rankings -->
+        <div class="cc-rankings">
+          <div class="cc-section-title">Oficinas este mes</div>
+          <div class="cc-rank-list" id="cc-rank-list"></div>
+
+          <div class="cc-section-title" style="margin-top:20px">Servicio estrella</div>
+          <div class="cc-star-service" id="cc-star-service">—</div>
+
+          <div class="cc-section-title" style="margin-top:20px">Ingreso estimado total</div>
+          <div class="cc-total-profit" id="cc-total-profit">$0</div>
+          <div class="cc-profit-sub">basado en citas confirmadas</div>
+        </div>
+        <!-- Right: bar chart -->
+        <div class="cc-chart">
+          <div class="cc-section-title">Citas por oficina · últimos 6 meses</div>
+          <div class="cc-bars" id="cc-bars"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- FILTERS -->
-  <div class="filters-bar">
-    <input type="date" class="date-filter" id="filter-date" onchange="renderList()" />
-    <select class="filter-select" id="filter-status" onchange="renderList()">
-      <option value="">Todos los estados</option>
-      <option value="pending">Pendientes</option>
-      <option value="confirmed">Confirmadas</option>
-      <option value="completed">Completadas</option>
-      <option value="cancelled">Canceladas</option>
-    </select>
-    <select class="filter-select" id="filter-location" onchange="renderList()">
-      <option value="">Todas las oficinas</option>
-    </select>
-    <button class="refresh-btn" onclick="renderAll()" title="Actualizar"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.87 4.4 2.2L14 3v4h-4l1.5-1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-  </div>
-
-  <!-- APPOINTMENTS LIST -->
-  <div class="appts-container" id="appts-list">
-    <!-- generado por JS -->
+  <!-- TAB: CITAS -->
+  <div id="tab-content-citas" style="display:none">
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div><div class="stat-label">Pendientes</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-confirmed" style="color:var(--success)">0</div><div class="stat-label">Confirmadas</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-today" style="color:var(--info)">0</div><div class="stat-label">Hoy</div></div>
+    </div>
+    <div class="filters-bar">
+      <input type="date" class="date-filter" id="filter-date" onchange="renderList()" />
+      <select class="filter-select" id="filter-status" onchange="renderList()">
+        <option value="">Todos los estados</option>
+        <option value="pending">Pendientes</option>
+        <option value="confirmed">Confirmadas</option>
+        <option value="completed">Completadas</option>
+        <option value="cancelled">Canceladas</option>
+      </select>
+      <select class="filter-select" id="filter-location" onchange="renderList()">
+        <option value="">Todas las oficinas</option>
+      </select>
+    </div>
+    <div class="appts-container" id="appts-list"></div>
   </div>
 
 </div>
