@@ -23,7 +23,7 @@ const SOSATI = {
       { id: "dmv",        label: "DMV / Vehículos", icon: "" },
       { id: "insurance",  label: "Aseguranza",      icon: "" },
       { id: "notary",     label: "Notario",         icon: "" },
-      { id: "general",    label: "Asesoría General",icon: "" }
+      { id: "general",    label: "Asesoría",      icon: "" }
     ],
     timeSlots: [
       "10:00 AM", "11:00 AM", "12:00 PM",
