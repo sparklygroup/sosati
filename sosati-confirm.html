@@ -165,7 +165,7 @@
     .upload-card {
       background: var(--white);
       border-radius: var(--radius-lg);
-      padding: 22px;
+      padding: 22px 22px 26px;
       box-shadow: var(--shadow-sm);
     }
 
@@ -193,16 +193,18 @@
     .upload-arrow svg { width: 16px; height: 16px; }
 
     .upload-subtitle {
-      font-size: 12px;
-      color: var(--gray-400);
-      margin-bottom: 16px;
+      font-size: 12.5px;
+      color: var(--gray-500);
+      margin-bottom: 10px;
+      line-height: 1.5;
     }
 
     .upload-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
+      gap: 16px;
+      margin-bottom: 16px;
+      margin-top: 16px;
     }
 
     .upload-doclist {
@@ -432,16 +434,16 @@
         </span>
         <span>Sube tus documentos</span>
       </div>
-      <div class="upload-subtitle">Adelanta tu trámite subiendo tus documentos ahora y llega listo</div>
+      <div class="upload-subtitle">Ahorra tiempo subiendo tus documentos</div>
       <div class="upload-security">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z" stroke="#16a34a" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 8l2 2 3-3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Tus documentos están protegidos con cifrado. Almacenamiento seguro certificado por Cloudinary y DocuSign.
+        Almacenamiento cifrado y certificado por Cloudinary y DocuSign
       </div>
 
       <div class="upload-layout">
         <!-- LEFT: doc list by service -->
         <div class="upload-doclist">
-          <div class="doclist-title">Documentos sugeridos</div>
+          <div class="doclist-title">Documentos</div>
           <div class="doclist-note">Varían según el trámite</div>
           <ul class="doclist-items" id="doclist-items"></ul>
         </div>
