@@ -19,10 +19,10 @@ const SOSATI = {
     ],
     services: [
       { id: "tax",        label: "Impuestos (Tax)",            icon: "📋" },
+      { id: "accounting", label: "Contabilidad",               icon: "📊" },
+      { id: "dmv",        label: "Registro de Vehículo (DMV)", icon: "🚗" },
       { id: "insurance",  label: "Aseguranza (Insurance)",     icon: "🛡️" },
       { id: "notary",     label: "Notario (Notary Public)",    icon: "✍️" },
-      { id: "dmv",        label: "Registro de Vehículo (DMV)", icon: "🚗" },
-      { id: "accounting", label: "Contabilidad",               icon: "📊" },
       { id: "general",    label: "Asesoría General",           icon: "💬" }
     ],
     timeSlots: [
