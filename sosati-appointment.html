@@ -35,20 +35,21 @@
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <h1 style="font-size:21px;letter-spacing:0.2px;color:#fff;font-family:var(--font-display)">Seal Services</h1>
-          <p style="font-size:10.5px;opacity:0.75;margin-top:2px;color:#fff">Servicio rápido y profesional · Fresno, CA</p>
+          <p style="font-size:10px;opacity:0.75;margin-top:2px;color:#fff;white-space:nowrap">Servicio rápido y profesional · Fresno, CA</p>
         </div>
-        <div style="text-align:right;margin-left:12px">
+        <div style="text-align:right;margin-left:12px;flex-shrink:0">
           <p style="font-size:13px;color:rgba(255,255,255,0.95);font-weight:600;white-space:nowrap">Agenda tu cita</p>
-          <p style="font-size:10px;opacity:0.5;margin-top:2px;letter-spacing:0.5px;color:#fff">powered by sosati.app</p>
+          <p style="font-size:10px;opacity:0.5;margin-top:2px;letter-spacing:0.5px;color:#fff;white-space:nowrap">powered by sosati.app</p>
         </div>
+      </div>
+      <div style="display:flex;gap:5px;margin-top:8px">
+        <div id="step-1" style="width:20px;height:5px;border-radius:3px;background:rgba(255,255,255,0.9)"></div>
+        <div id="step-2" style="width:8px;height:5px;border-radius:3px;background:rgba(255,255,255,0.3)"></div>
       </div>
     </div>
   </header>
 
-  <div class="step-indicator">
-    <div class="step-dot active"></div>
-    <div class="step-dot"></div>
-  </div>
+
   <div class="sosati-container">
     <div class="card" style="animation-delay:0.05s">
       <div class="section-label">Tu información</div>
@@ -176,7 +177,7 @@
       SOSATI.config.services.forEach(function(s) {
         var div = document.createElement("div");
         div.className = "service-card"; div.dataset.id = s.id;
-        div.innerHTML = "<span class='icon'>"+s.icon+"</span><span class='name'>"+s.label+"</span>";
+        div.innerHTML = (s.icon ? "<span class='icon'>"+s.icon+"</span>" : "") + "<span class='name'>"+s.label+"</span>";
         div.onclick = function(){ selectService(s.id); };
         grid.appendChild(div);
       });
