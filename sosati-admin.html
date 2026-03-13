@@ -809,6 +809,7 @@ function initAdmin() {
   buildLocationFilter();
   setDefaultDate();
   renderAll();
+  renderDashboard();
 
   // BroadcastChannel — recibir nuevas citas en tiempo real
   SOSATI.initBroadcast((msg) => {
@@ -1056,6 +1057,136 @@ function closeModal() {
 document.getElementById("modal").addEventListener("click", (e) => {
   if (e.target === e.currentTarget) closeModal();
 });
+
+// ══════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════
+function switchTab(tab) {
+  ['dashboard','citas'].forEach(function(t) {
+    document.getElementById('tab-content-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'dashboard') renderDashboard();
+}
+
+// ══════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════
+var SERVICE_PRICES = { tax:150, accounting:120, dmv:50, insurance:80, notary:35, general:75 };
+var LOCS = ['belmont','ventura','kings'];
+var LOC_PREFIX = { belmont:'b', ventura:'v', kings:'k' };
+var LOC_NAMES = { belmont:'Belmont Ave', ventura:'Ventura Blvd', kings:'Kings Canyon' };
+var MONTHS_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function renderDashboard() {
+  var all = SOSATI.storage.getAll();
+  var now = new Date();
+  var todayStr = SOSATI.utils.todayStr();
+  var weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  var monthStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+
+  var el = document.getElementById('cc-month-label');
+  if (el) el.textContent = MONTHS_ES[now.getMonth()] + ' ' + now.getFullYear();
+
+  var maxMonth = 1;
+  var officeTotals = {};
+  var serviceCount = {};
+  var totalProfit = 0;
+
+  LOCS.forEach(function(loc) {
+    var p = LOC_PREFIX[loc];
+    var locAll   = all.filter(function(a){ return a.location === loc; });
+    var locToday = locAll.filter(function(a){ return a.date === todayStr; }).length;
+    var locWeek  = locAll.filter(function(a){ return a.date && new Date(a.date+'T00:00:00') >= weekAgo; }).length;
+    var locMonth = locAll.filter(function(a){ return a.date && a.date.startsWith(monthStr); }).length;
+    var locConf  = locAll.filter(function(a){ return a.date && a.date.startsWith(monthStr) && a.status === 'confirmed'; });
+    var profit   = locConf.reduce(function(sum,a){ return sum + (SERVICE_PRICES[a.service] || 75); }, 0);
+
+    var svcMap = {};
+    locAll.forEach(function(a){ if(a.serviceLabel) svcMap[a.serviceLabel] = (svcMap[a.serviceLabel]||0)+1; });
+    var topSvc = Object.entries(svcMap).sort(function(a,b){return b[1]-a[1];})[0];
+
+    var setEl = function(id, val){ var e = document.getElementById(id); if(e) e.textContent = val; };
+    setEl('o'+p+'-today',  locToday);
+    setEl('o'+p+'-week',   locWeek);
+    setEl('o'+p+'-month',  locMonth);
+    setEl('o'+p+'-profit', '$' + profit.toLocaleString());
+    setEl('o'+p+'-top', topSvc ? ('Más solicitado: ' + topSvc[0]) : '— sin citas este mes —');
+
+    officeTotals[loc] = locMonth;
+    totalProfit += profit;
+    if (locMonth > maxMonth) maxMonth = locMonth;
+
+    locAll.forEach(function(a){ if(a.serviceLabel) serviceCount[a.serviceLabel] = (serviceCount[a.serviceLabel]||0)+1; });
+  });
+
+  // Progress bars
+  LOCS.forEach(function(loc) {
+    var bar = document.getElementById('o'+LOC_PREFIX[loc]+'-bar');
+    if (bar) bar.style.width = Math.round(officeTotals[loc]/maxMonth*100) + '%';
+  });
+
+  // Rankings
+  var ranked = Object.entries(officeTotals).sort(function(a,b){return b[1]-a[1];});
+  var medals = ['gold','silver','bronze'];
+  var arrows = [['↑','#16a34a'],['→','#f59e0b'],['↓','#ef4444']];
+  var rankList = document.getElementById('cc-rank-list');
+  if (rankList) {
+    rankList.innerHTML = ranked.map(function(item, i) {
+      return '<div class="cc-rank-item">' +
+        '<div class="cc-rank-pos ' + medals[i] + '">' + (i+1) + '</div>' +
+        '<div class="cc-rank-info">' +
+          '<div class="cc-rank-name">' + LOC_NAMES[item[0]] + '</div>' +
+          '<div class="cc-rank-count">' + item[1] + ' citas este mes</div>' +
+        '</div>' +
+        '<div class="cc-rank-arrow" style="color:' + arrows[i][1] + '">' + arrows[i][0] + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Star service
+  var starEl = document.getElementById('cc-star-service');
+  if (starEl) {
+    var topGlobal = Object.entries(serviceCount).sort(function(a,b){return b[1]-a[1];})[0];
+    starEl.textContent = topGlobal ? (topGlobal[0] + ' (' + topGlobal[1] + ' citas)') : '—';
+  }
+
+  // Total profit
+  var profitEl = document.getElementById('cc-total-profit');
+  if (profitEl) profitEl.textContent = '$' + totalProfit.toLocaleString();
+
+  // Bar chart last 6 months
+  var barsEl = document.getElementById('cc-bars');
+  if (barsEl) {
+    var months = [];
+    for (var i = 5; i >= 0; i--) {
+      var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      months.push({ str: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: MONTHS_ES[d.getMonth()] });
+    }
+    var maxVal = 1;
+    var data = months.map(function(m) {
+      var counts = {};
+      LOCS.forEach(function(loc) {
+        counts[loc] = all.filter(function(a){ return a.location===loc && a.date && a.date.startsWith(m.str); }).length;
+        if (counts[loc] > maxVal) maxVal = counts[loc];
+      });
+      return { label: m.label, counts: counts };
+    });
+    var locColors = { belmont:'loc-b', ventura:'loc-v', kings:'loc-k' };
+    barsEl.innerHTML = data.map(function(m) {
+      var cols = LOCS.map(function(loc) {
+        var h = Math.max(4, Math.round(m.counts[loc]/maxVal*110));
+        return '<div class="cc-bar-col ' + locColors[loc] + '" style="height:' + h + 'px" title="' + LOC_NAMES[loc] + ': ' + m.counts[loc] + '"></div>';
+      }).join('');
+      return '<div class="cc-bar-group"><div class="cc-bar-cols">' + cols + '</div><div class="cc-bar-month">' + m.label + '</div></div>';
+    }).join('') +
+    '<div style="width:100%;margin-top:12px;display:flex;gap:14px;flex-wrap:wrap">' +
+      '<div class="cc-legend-item"><div class="cc-legend-dot" style="background:var(--brand)"></div>Belmont</div>' +
+      '<div class="cc-legend-item"><div class="cc-legend-dot" style="background:#7c3aed"></div>Ventura</div>' +
+      '<div class="cc-legend-item"><div class="cc-legend-dot" style="background:#06b6d4"></div>Kings</div>' +
+    '</div>';
+  }
+}
 
 // ══════════════════════════════════════════════════════
 // TOAST
