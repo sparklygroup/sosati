@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#29156e" />
+  <title>Requisitos — Seal Services</title>
+  <link rel="stylesheet" href="sosati-style.css" />
+  <style>
+    body { background: var(--gray-50); min-height: 100vh; }
+
+    /* HEADER */
+    .req-header {
+      background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
+      padding: 20px 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .req-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .req-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .req-back:hover { color: #fff; }
+
+    .req-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .req-subtitle {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 2px;
+    }
+
+    /* SERVICE TABS */
+    .req-tabs {
+      display: flex;
+      gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 0;
+      margin: 0 -20px;
+      padding: 0 20px;
+    }
+    .req-tabs::-webkit-scrollbar { display: none; }
+
+    .req-tab {
+      padding: 10px 16px;
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      background: none;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-bottom: 0;
+    }
+    .req-tab.active { color: #fff; border-bottom-color: #fff; }
+    .req-tab:hover { color: rgba(255,255,255,0.85); }
+
+    /* CONTENT */
+    .req-content {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .req-panel { display: none; animation: fadeUp 0.3s ease both; }
+    .req-panel.active { display: block; }
+
+    /* SERVICE HERO */
+    .req-service-hero {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .req-service-icon {
+      width: 48px; height: 48px;
+      background: var(--brand-soft);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .req-service-icon svg { width: 24px; height: 24px; color: var(--brand); }
+
+    .req-service-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      color: var(--brand);
+      font-weight: 700;
+    }
+
+    .req-service-desc {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+
+    /* DOC CARDS */
+    .req-section-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--gray-400);
+      margin: 18px 0 10px;
+    }
+
+    .req-doc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .req-doc-item {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .req-doc-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--brand);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .req-doc-dot.optional { background: var(--gray-300); }
+
+    .req-doc-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--gray-800);
+      line-height: 1.3;
+    }
+
+    .req-doc-note {
+      font-size: 11.5px;
+      color: var(--gray-500);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .req-doc-badge {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 99px;
+    }
+
+    .req-doc-badge.required {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .req-doc-badge.optional {
+      background: var(--gray-100);
+      color: var(--gray-500);
+    }
+
+    /* TIP BOX */
+    .req-tip {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #1e40af;
+      line-height: 1.5;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    /* CTA */
+    .req-cta {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .req-cta a {
+      display: inline-block;
+      background: var(--brand);
+      color: #fff;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 14px 32px;
+      border-radius: 99px;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .req-cta a:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+<div class="req-header">
+  <div class="req-header-top">
+    <a href="sosati-appointment.html" class="req-back">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Regresar
+    </a>
+    <div style="text-align:right">
+      <div class="req-title">Requisitos</div>
+      <div class="req-subtitle">Seal Services · Fresno, CA</div>
+    </div>
+  </div>
+
+  <div class="req-tabs">
+    <button class="req-tab active" onclick="showPanel('tax', this)">Impuestos</button>
+    <button class="req-tab" onclick="showPanel('accounting', this)">Contabilidad</button>
+    <button class="req-tab" onclick="showPanel('dmv', this)">DMV</button>
+    <button class="req-tab" onclick="showPanel('insurance', this)">Aseguranza</button>
+    <button class="req-tab" onclick="showPanel('notary', this)">Notario</button>
+    <button class="req-tab" onclick="showPanel('general', this)">Asesoría</button>
+  </div>
+</div>
+
+<div class="req-content">
+
+  <!-- IMPUESTOS -->
+  <div class="req-panel active" id="panel-tax">
+    <div class="req-service-hero">
+      <div class="req-service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+      </div>
+      <div>
+        <div class="req-service-name">Impuestos</div>
+        <div class="req-service-desc">Preparación de taxes federal y estatal para individuos y negocios.</div>
+      </div>
+    </div>
+
+    <div class="req-section-title">Documentos requeridos</div>
+    <div class="req-doc-list">
+      <div class="req-doc-item">
+        <div class="req-doc-dot"></div>
+        <div><div class="req-doc-name">ID o Licencia de manejo</div><div class="req-doc-note">Identificación válida con foto</div></div>
+        <div class="req-doc-badge required">Requerido</div>
+      </div>
+      <div class="req-doc-item">
+        <div class="req-doc-dot"></div>
+        <div><div class="req-doc-name">W-2 o 1099</div><div class="req-doc-note">Formulario de ingresos de tu empleador</div></div>
+        <div class="req-doc-badge required">Requerido</div>
+      </div>
+      <div class="req-doc-item">
+        <div class="req-doc-dot"></div>
+        <div><div class="req-doc-name">Número de Seguro Social o ITIN</div><div class="req-doc-note">De todos los miembros del hogar que apliquen</div></div>
+        <div class="req-doc-badge required">Requerido</div>
+      </div>
+      <div class="req-doc-item">
+        <div class="req-doc-dot optional"></div>
+        <div><div class="req-doc-name">Taxes del año anterior</div><div class="req-doc-note">Si los tienes disponibles, agilizan el proceso</div></div>
+        <div class="req-doc-badge optional">Opcional</div>
+      </div>
+      <div class="req-doc-item">
+        <div class="req-doc-dot optional"></div>
+        <div><div class="req-doc-name">Gastos deducibles</div><div class="req-doc-note">Recibos médicos, donaciones, intereses de hipoteca</div></div>
+        <div class="req-doc-badge optional">Opcional</div>
+      </div>
+    </div>
+    <div class="req-tip">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Trae todos tus documentos en orden para agilizar tu cita. Si tienes dudas, llama al (559) 266-6555 antes de tu visita.
+    </div>
+    <div class="req-cta"><a href="sosati-appointment.html">Agendar mi cita →</a></div>
+  </div>
+
+  <!-- CONTABILIDAD -->
+  <div class="req-panel" id="panel-accounting">
+    <div class="req-service-hero">
+      <div class="req-service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h4M6 12h8"/></svg>
+      </div>
+      <div>
+        <div class="req-service-name">Contabilidad</div>
+        <div class="req-service-desc">Manejo de libros contables, balances y reportes financieros para tu negocio.</div>
+      </div>
+    </div>
+    <div class="req-section-title">Documentos requeridos</div>
+    <div class="req-doc-list">
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">ID o Licencia de manejo</div><div class="req-doc-note">Identificación válida del dueño del negocio</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">Estados de cuenta bancarios</div><div class="req-doc-note">Últimos 3-6 meses de todas las cuentas del negocio</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">Registros de ventas e ingresos</div><div class="req-doc-note">Facturas, recibos o reporte de punto de venta</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot optional"></div><div><div class="req-doc-name">Registros de gastos</div><div class="req-doc-note">Recibos de compras, renta, servicios, nómina</div></div><div class="req-doc-badge optional">Opcional</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot optional"></div><div><div class="req-doc-name">EIN del negocio</div><div class="req-doc-note">Número de identificación del empleador (si aplica)</div></div><div class="req-doc-badge optional">Opcional</div></div>
+    </div>
+    <div class="req-tip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Entre más organizada venga la información, más rápido y económico será el servicio.</div>
+    <div class="req-cta"><a href="sosati-appointment.html">Agendar mi cita →</a></div>
+  </div>
+
+  <!-- DMV -->
+  <div class="req-panel" id="panel-dmv">
+    <div class="req-service-hero">
+      <div class="req-service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="6" width="22" height="13" rx="2"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><circle cx="8" cy="13" r="1.5"/><circle cx="16" cy="13" r="1.5"/></svg>
+      </div>
+      <div>
+        <div class="req-service-name">DMV / Vehículos</div>
+        <div class="req-service-desc">Registro, transferencia de título y trámites del Departamento de Vehículos Motorizados.</div>
+      </div>
+    </div>
+    <div class="req-section-title">Documentos requeridos</div>
+    <div class="req-doc-list">
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">ID o Licencia de manejo</div><div class="req-doc-note">Identificación válida del propietario</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">Título del vehículo</div><div class="req-doc-note">Pink slip — documento de propiedad del auto</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">Prueba de seguro vigente</div><div class="req-doc-note">Tarjeta de seguro con fecha actual</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot optional"></div><div><div class="req-doc-name">Smog Check</div><div class="req-doc-note">Requerido para vehículos de más de 4 años en CA</div></div><div class="req-doc-badge optional">Según año</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot optional"></div><div><div class="req-doc-name">Placas actuales</div><div class="req-doc-note">Si es renovación de registro</div></div><div class="req-doc-badge optional">Renovación</div></div>
+    </div>
+    <div class="req-tip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Verifica el estado de tu smog check antes de llegar. Llama al (559) 266-6555 si tienes dudas sobre tu trámite específico.</div>
+    <div class="req-cta"><a href="sosati-appointment.html">Agendar mi cita →</a></div>
+  </div>
+
+  <!-- ASEGURANZA -->
+  <div class="req-panel" id="panel-insurance">
+    <div class="req-service-hero">
+      <div class="req-service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L3 7v6c0 5 3.9 9.7 9 11 5.1-1.3 9-6 9-11V7l-9-5z"/></svg>
+      </div>
+      <div>
+        <div class="req-service-name">Aseguranza</div>
+        <div class="req-service-desc">Seguros de auto, hogar, vida y negocios a tu medida.</div>
+      </div>
+    </div>
+    <div class="req-section-title">Documentos requeridos</div>
+    <div class="req-doc-list">
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">ID o Licencia de manejo</div><div class="req-doc-note">Identificación válida del solicitante</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">Seguro actual (si tienes)</div><div class="req-doc-note">Para comparar cobertura y precio</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot optional"></div><div><div class="req-doc-name">Título del vehículo</div><div class="req-doc-note">Para seguro de auto — VIN y año del vehículo</div></div><div class="req-doc-badge optional">Seguro auto</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot optional"></div><div><div class="req-doc-name">Información de la propiedad</div><div class="req-doc-note">Dirección y valor estimado para seguro de hogar</div></div><div class="req-doc-badge optional">Seguro hogar</div></div>
+    </div>
+    <div class="req-tip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Trae tu seguro actual para que podamos encontrarte una mejor opción al mejor precio.</div>
+    <div class="req-cta"><a href="sosati-appointment.html">Agendar mi cita →</a></div>
+  </div>
+
+  <!-- NOTARIO -->
+  <div class="req-panel" id="panel-notary">
+    <div class="req-service-hero">
+      <div class="req-service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div>
+        <div class="req-service-name">Notario</div>
+        <div class="req-service-desc">Servicio notarial para documentos legales, contratos y poderes notariales.</div>
+      </div>
+    </div>
+    <div class="req-section-title">Documentos requeridos</div>
+    <div class="req-doc-list">
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">ID o Licencia de manejo vigente</div><div class="req-doc-note">Identificación con foto no expirada — obligatorio por ley</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">Documento a notarizar</div><div class="req-doc-note">Contrato, poder notarial, declaración u otro documento</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot optional"></div><div><div class="req-doc-name">ID de testigos</div><div class="req-doc-note">Si el documento requiere testigos, deben traer ID también</div></div><div class="req-doc-badge optional">Si aplica</div></div>
+    </div>
+    <div class="req-tip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>NO firmes el documento antes de llegar. El notario debe presenciar tu firma para que sea válida.</div>
+    <div class="req-cta"><a href="sosati-appointment.html">Agendar mi cita →</a></div>
+  </div>
+
+  <!-- ASESORÍA -->
+  <div class="req-panel" id="panel-general">
+    <div class="req-service-hero">
+      <div class="req-service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </div>
+      <div>
+        <div class="req-service-name">Asesoría</div>
+        <div class="req-service-desc">Consultoría general sobre trámites, negocios y servicios gubernamentales.</div>
+      </div>
+    </div>
+    <div class="req-section-title">Documentos requeridos</div>
+    <div class="req-doc-list">
+      <div class="req-doc-item"><div class="req-doc-dot"></div><div><div class="req-doc-name">ID o Licencia de manejo</div><div class="req-doc-note">Identificación válida</div></div><div class="req-doc-badge required">Requerido</div></div>
+      <div class="req-doc-item"><div class="req-doc-dot optional"></div><div><div class="req-doc-name">Documentos relacionados al tema</div><div class="req-doc-note">Cartas, notificaciones, contratos u otros documentos relevantes</div></div><div class="req-doc-badge optional">Si aplica</div></div>
+    </div>
+    <div class="req-tip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Trae cualquier documento relacionado con tu consulta. Entre más información tengas, mejor podremos orientarte.</div>
+    <div class="req-cta"><a href="sosati-appointment.html">Agendar mi cita →</a></div>
+  </div>
+
+</div>
+
+<script>
+function showPanel(id, btn) {
+  document.querySelectorAll('.req-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.req-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  // Scroll tab into view
+  btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+</script>
+</body>
+</html>
