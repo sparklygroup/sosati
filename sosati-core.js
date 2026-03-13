@@ -18,12 +18,12 @@ const SOSATI = {
       { id: "kings",    label: "Kings Canyon — 4244 E Kings Canyon Rd #103, Fresno CA 93702", tel: "(559) 493-5911" }
     ],
     services: [
-      { id: "tax",        label: "Impuestos (Tax)",            icon: "" },
-      { id: "accounting", label: "Contabilidad",               icon: "" },
-      { id: "dmv",        label: "Registro de Vehículo (DMV)", icon: "" },
-      { id: "insurance",  label: "Aseguranza (Insurance)",     icon: "" },
-      { id: "notary",     label: "Notario (Notary Public)",    icon: "" },
-      { id: "general",    label: "Asesoría General",           icon: "" }
+      { id: "tax",        label: "Impuestos",       icon: "" },
+      { id: "accounting", label: "Contabilidad",    icon: "" },
+      { id: "dmv",        label: "DMV / Vehículos", icon: "" },
+      { id: "insurance",  label: "Aseguranza",      icon: "" },
+      { id: "notary",     label: "Notario",         icon: "" },
+      { id: "general",    label: "Asesoría General",icon: "" }
     ],
     timeSlots: [
       "10:00 AM", "11:00 AM", "12:00 PM",
