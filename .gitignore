@@ -1,1 +1,3 @@
 node_modules/
+docusign_private.pem
+docusign_public.pem
