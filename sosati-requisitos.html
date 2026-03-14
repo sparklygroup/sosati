@@ -51,34 +51,7 @@
       margin-top: 2px;
     }
 
-    /* SERVICE TABS */
-    .req-tabs {
-      display: flex;
-      gap: 2px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding-bottom: 0;
-      margin: 0 -20px;
-      padding: 0 20px;
-    }
-    .req-tabs::-webkit-scrollbar { display: none; }
 
-    .req-tab {
-      padding: 10px 16px;
-      font-family: var(--font-body);
-      font-size: 12.5px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.55);
-      background: none;
-      border: none;
-      border-bottom: 2.5px solid transparent;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: var(--transition);
-      margin-bottom: 0;
-    }
-    .req-tab.active { color: #fff; border-bottom-color: #fff; }
-    .req-tab:hover { color: rgba(255,255,255,0.85); }
 
     /* CONTENT */
     .req-content {
@@ -251,6 +224,45 @@
     }
 
     .req-footer-link:hover { opacity: 1; }
+    /* SERVICE SELECTOR GRID */
+    .req-service-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .req-svc-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 8px;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      background: var(--white);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .req-svc-btn:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+
+    .req-svc-btn.active {
+      border-color: var(--brand);
+      background: var(--brand);
+      color: var(--white);
+    }
+
+    .req-svc-btn svg { flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -267,17 +279,38 @@
     </div>
   </div>
 
-  <div class="req-tabs">
-    <button class="req-tab active" onclick="showPanel('tax', this)">Impuestos</button>
-    <button class="req-tab" onclick="showPanel('accounting', this)">Contabilidad</button>
-    <button class="req-tab" onclick="showPanel('dmv', this)">DMV</button>
-    <button class="req-tab" onclick="showPanel('insurance', this)">Aseguranza</button>
-    <button class="req-tab" onclick="showPanel('notary', this)">Notario</button>
-    <button class="req-tab" onclick="showPanel('general', this)">Asesoría</button>
-  </div>
+
 </div>
 
 <div class="req-content">
+
+  <!-- SERVICE SELECTOR GRID -->
+  <div class="req-service-grid">
+    <button class="req-svc-btn active" id="btn-tax" onclick="showPanel('tax', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+      Impuestos
+    </button>
+    <button class="req-svc-btn" id="btn-accounting" onclick="showPanel('accounting', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h4M6 12h8"/></svg>
+      Contabilidad
+    </button>
+    <button class="req-svc-btn" id="btn-dmv" onclick="showPanel('dmv', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="6" width="22" height="13" rx="2"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><circle cx="8" cy="13" r="1.5"/><circle cx="16" cy="13" r="1.5"/></svg>
+      DMV
+    </button>
+    <button class="req-svc-btn" id="btn-insurance" onclick="showPanel('insurance', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L3 7v6c0 5 3.9 9.7 9 11 5.1-1.3 9-6 9-11V7l-9-5z"/></svg>
+      Aseguranza
+    </button>
+    <button class="req-svc-btn" id="btn-notary" onclick="showPanel('notary', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+      Notario
+    </button>
+    <button class="req-svc-btn" id="btn-general" onclick="showPanel('general', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      Asesoría
+    </button>
+  </div>
 
   <!-- IMPUESTOS -->
   <div class="req-panel active" id="panel-tax">
@@ -440,11 +473,9 @@
 <script>
 function showPanel(id, btn) {
   document.querySelectorAll('.req-panel').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.req-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.req-svc-btn').forEach(function(t){ t.classList.remove('active'); });
   document.getElementById('panel-' + id).classList.add('active');
   btn.classList.add('active');
-  // Scroll tab into view
-  btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
 </script>
 <div class="req-footer">
