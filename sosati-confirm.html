@@ -1,319 +1,411 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <meta name="theme-color" content="#29156e" />
-  <title>Cita Confirmada — Seal Services</title>
-  <link rel="stylesheet" href="sosati-style.css" />
-  <style>
-    body { background: var(--brand); min-height: 100vh; }
-
-    .confirm-wrapper {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 0 0 80px;
-    }
-
-    /* HERO SUCCESS */
-    .success-hero {
-      width: 100%;
-      background: linear-gradient(160deg, var(--brand) 0%, var(--brand-light) 100%);
-      padding: 48px 24px 36px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .success-hero::before {
-      content: '';
-      position: absolute;
-      top: -60px; right: -60px;
-      width: 200px; height: 200px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-    }
-
-    .success-hero::after {
-      content: '';
-      position: absolute;
-      bottom: -40px; left: -40px;
-      width: 150px; height: 150px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-    }
-
-    .success-checkmark {
-      width: 84px; height: 84px;
-      background: var(--success);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 38px;
-      box-shadow: 0 8px 32px rgba(16,185,129,0.5);
-      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-      position: relative; z-index: 1;
-    }
-
-    .success-hero h2 {
-      font-family: var(--font-display);
-      font-size: 26px;
-      color: var(--white);
-      margin-bottom: 8px;
-      position: relative; z-index: 1;
-      animation: fadeUp 0.5s 0.2s ease both;
-    }
-
-    .success-hero p {
-      font-size: 14px;
-      color: rgba(255,255,255,0.8);
-      position: relative; z-index: 1;
-      animation: fadeUp 0.5s 0.3s ease both;
-    }
-
-    /* DETAIL CARD */
-    .detail-card {
-      width: calc(100% - 32px);
-      max-width: 448px;
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin: -24px auto 16px;
-      box-shadow: var(--shadow-lg);
-      position: relative; z-index: 10;
-      animation: fadeUp 0.5s 0.1s ease both;
-    }
-
-    .detail-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--gray-100);
-    }
-
-    .detail-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .detail-row:first-child { padding-top: 0; }
-
-    .detail-icon {
-      width: 38px; height: 38px;
-      border-radius: 10px;
-      background: var(--brand-soft);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-
-    .detail-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      font-weight: 600;
-      color: var(--gray-400);
-      margin-bottom: 2px;
-    }
-
-    .detail-value {
-      font-size: 14.5px;
-      font-weight: 600;
-      color: var(--gray-800);
-      line-height: 1.4;
-    }
-
-    /* CONFIRMATION ID */
-    .conf-id-box {
-      width: calc(100% - 32px);
-      max-width: 448px;
-      margin: 0 auto 16px;
-      animation: fadeUp 0.5s 0.25s ease both;
-    }
-
-    .conf-id-inner {
-      background: var(--brand-soft);
-      border: 1.5px dashed var(--brand);
-      border-radius: var(--radius-md);
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .conf-id-label { font-size: 11.5px; color: var(--brand); font-weight: 600; }
-    .conf-id-value {
-      font-family: monospace;
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--brand);
-      letter-spacing: 2px;
-    }
-
-    .copy-btn {
-      background: var(--brand);
-      color: var(--white);
-      border: none;
-      border-radius: 8px;
-      padding: 7px 12px;
-      font-size: 12px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: var(--transition);
-      flex-shrink: 0;
-    }
-
-    .copy-btn:hover { background: var(--brand-dark); }
-
-    /* ACTIONS */
-    .actions-area {
-      width: calc(100% - 32px);
-      max-width: 448px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      animation: fadeUp 0.5s 0.35s ease both;
-    }
-
-    /* REMINDER BOX */
-    .reminder-box {
-      width: calc(100% - 32px);
-      max-width: 448px;
-      margin: 16px auto 0;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      animation: fadeUp 0.5s 0.4s ease both;
-    }
-
-    .reminder-box p {
-      font-size: 12.5px;
-      color: rgba(255,255,255,0.85);
-      line-height: 1.6;
-    }
-
-    .reminder-box strong { color: var(--white); }
-
-    @keyframes popIn {
-      0%   { transform: scale(0); opacity: 0; }
-      60%  { transform: scale(1.15); }
-      100% { transform: scale(1); opacity: 1; }
-    }
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; text-align: center; font: 38.0px 'Apple Color Emoji'; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; text-align: center; font: 38.0px 'Apple Color Emoji'; -webkit-text-stroke: #000000; min-height: 50.0px}
+    span.s1 {font-kerning: none}
   </style>
 </head>
 <body>
-
-<div class="confirm-wrapper">
-
-  <!-- SUCCESS HERO -->
-  <div class="success-hero">
-    <div class="success-checkmark">✅</div>
-    <h2>¡Cita Agendada!</h2>
-    <p>Te esperamos en Seal Services · Fresno, CA</p>
-  </div>
-
-  <!-- DETAIL CARD -->
-  <div class="detail-card" id="detail-card">
-    <!-- generado por JS -->
-  </div>
-
-  <!-- CONFIRMATION ID -->
-  <div class="conf-id-box">
-    <div class="conf-id-inner">
-      <div>
-        <div class="conf-id-label">Número de confirmación</div>
-        <div class="conf-id-value" id="conf-id">—</div>
-      </div>
-      <button class="copy-btn" onclick="copyId()">Copiar</button>
-    </div>
-  </div>
-
-  <!-- ACTIONS -->
-  <div class="actions-area">
-    <a href="tel:5592666555" class="btn btn-primary" style="text-align:center">
-      📞 Llamar a la oficina
-    </a>
-    <a href="sosati-appointment.html" class="btn" style="background:rgba(255,255,255,0.15);color:white;text-align:center">
-      + Agendar otra cita
-    </a>
-  </div>
-
-  <!-- REMINDER -->
-  <div class="reminder-box">
-    <p>
-      📌 <strong>Recuerda:</strong> Llega 10 minutos antes de tu cita.<br>
-      Si necesitas cancelar o cambiar tu horario, llámanos al
-      <strong>(559) 266-6555</strong> con anticipación.
-    </p>
-  </div>
-
-</div>
-
-<!-- TOAST -->
-<div id="sosati-toast"></div>
-
-<script src="sosati-core.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const raw = sessionStorage.getItem("sosati_last_appt");
-    if (!raw) {
-      // No hay cita — redirigir al formulario
-      window.location.href = "sosati-appointment.html";
-      return;
-    }
-
-    const appt = JSON.parse(raw);
-    renderDetails(appt);
-    document.getElementById("conf-id").textContent = appt.id;
-  });
-
-  function renderDetails(appt) {
-    const serviceObj = SOSATI.config.services.find(s => s.id === appt.service);
-    const icon = serviceObj?.icon || "🛠️";
-
-    const rows = [
-      { icon: "👤", label: "Nombre",   value: appt.name },
-      { icon: "📞", label: "Teléfono", value: appt.phone },
-      { icon: icon, label: "Servicio", value: appt.serviceLabel },
-      { icon: "📅", label: "Fecha",    value: SOSATI.utils.formatDate(appt.date) },
-      { icon: "🕐", label: "Horario",  value: appt.time },
-      { icon: "📍", label: "Oficina",  value: appt.locationLabel }
-    ];
-
-    if (appt.notes) {
-      rows.push({ icon: "📝", label: "Notas", value: appt.notes });
-    }
-
-    const card = document.getElementById("detail-card");
-    card.innerHTML = rows.map(r => `
-      <div class="detail-row">
-        <div class="detail-icon">${r.icon}</div>
-        <div>
-          <div class="detail-label">${r.label}</div>
-          <div class="detail-value">${r.value}</div>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function copyId() {
-    const id = document.getElementById("conf-id").textContent;
-    navigator.clipboard?.writeText(id).then(() => {
-      showToast("Número copiado al portapapeles ✓", "success");
-    }).catch(() => {
-      showToast("ID: " + id, "info");
-    });
-  }
-
-  function showToast(msg, type = "info") {
-    const t = document.getElementById("sosati-toast");
-    t.textContent = msg;
-    t.className = `show ${type}`;
-    setTimeout(() => { t.className = ""; }, 3000);
-  }
-</script>
+<p class="p1"><span class="s1">// SOSATI — Express Server</span></p>
+<p class="p1"><span class="s1">// Seal Services Appointment System</span></p>
+<p class="p1"><span class="s1">// Con Supabase + Cloudinary</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">const express<span class="Apple-converted-space">    </span>= require("express");</span></p>
+<p class="p1"><span class="s1">const path <span class="Apple-converted-space">      </span>= require("path");</span></p>
+<p class="p1"><span class="s1">const multer <span class="Apple-converted-space">    </span>= require("multer");</span></p>
+<p class="p1"><span class="s1">const cloudinary = require("cloudinary").v2;</span></p>
+<p class="p1"><span class="s1">const { createClient } = require("@supabase/supabase-js");</span></p>
+<p class="p1"><span class="s1">const docusign = require("docusign-esign");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">const app<span class="Apple-converted-space">  </span>= express();</span></p>
+<p class="p1"><span class="s1">const PORT = process.env.PORT || 8080;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── SUPABASE ──────────────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">const supabaseUrl = process.env.SUPABASE_URL || "";</span></p>
+<p class="p1"><span class="s1">const supabaseKey = process.env.SUPABASE_KEY || "";</span></p>
+<p class="p1"><span class="s1">let supabase = null;</span></p>
+<p class="p1"><span class="s1">if (supabaseUrl &amp;&amp; supabaseKey) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>supabase = createClient(supabaseUrl, supabaseKey);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>console.log("Supabase: Conectado");</span></p>
+<p class="p1"><span class="s1">} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>console.warn("Supabase: No configurado - usando modo local");</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── CLOUDINARY ────────────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">cloudinary.config({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>cloud_name: process.env.CLOUDINARY_CLOUD_NAME,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>api_key:<span class="Apple-converted-space">    </span>process.env.CLOUDINARY_API_KEY,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>api_secret: process.env.CLOUDINARY_API_SECRET</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── MULTER ────────────────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">const upload = multer({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>storage: multer.memoryStorage(),</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>limits: { fileSize: 10 * 1024 * 1024 },</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>fileFilter: (req, file, cb) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error("Solo JPG, PNG, WEBP y PDF"));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── MIDDLEWARE ────────────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.use(express.json());</span></p>
+<p class="p1"><span class="s1">app.use(express.urlencoded({ extended: true }));</span></p>
+<p class="p1"><span class="s1">app.use(express.static(path.join(__dirname), {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>etag: false,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>lastModified: false,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>setHeaders: (res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.setHeader('Pragma', 'no-cache');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.setHeader('Expires', '0');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">}));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── RUTAS HTML ────────────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.get("/",<span class="Apple-converted-space">            </span>(req, res) =&gt; res.sendFile(path.join(__dirname, "sosati-appointment.html")));</span></p>
+<p class="p1"><span class="s1">app.get("/appointment", (req, res) =&gt; res.sendFile(path.join(__dirname, "sosati-appointment.html")));</span></p>
+<p class="p1"><span class="s1">app.get("/confirm", <span class="Apple-converted-space">    </span>(req, res) =&gt; res.sendFile(path.join(__dirname, "sosati-confirm.html")));</span></p>
+<p class="p1"><span class="s1">app.get("/admin", <span class="Apple-converted-space">      </span>(req, res) =&gt; res.sendFile(path.join(__dirname, "sosati-admin.html")));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── API: CREAR CITA ───────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.post("/api/appointments", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const appt = req.body;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (!supabase) throw new Error('Supabase no configurado');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const { data, error } = await supabase</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.from("appointments")</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.insert([{</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>id: <span class="Apple-converted-space">            </span>appt.id,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>name: <span class="Apple-converted-space">          </span>appt.name,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>phone:<span class="Apple-converted-space">          </span>appt.phone,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>email:<span class="Apple-converted-space">          </span>appt.email || null,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>service:<span class="Apple-converted-space">        </span>appt.service,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>service_label:<span class="Apple-converted-space">  </span>appt.serviceLabel,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>date: <span class="Apple-converted-space">          </span>appt.date,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>time: <span class="Apple-converted-space">          </span>appt.time,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>location: <span class="Apple-converted-space">      </span>appt.location,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>location_label: appt.locationLabel,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>notes:<span class="Apple-converted-space">          </span>appt.notes || null,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>status: <span class="Apple-converted-space">        </span>"pending"</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}])</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.select()</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.single();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (error) throw error;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.json({ success: true, appointment: data });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch (err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.error("Create appointment error:", err);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── API: OBTENER TODAS LAS CITAS ──────────────────────────</span></p>
+<p class="p1"><span class="s1">app.get("/api/appointments", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let query = supabase.from("appointments").select("*").order("date", { ascending: true });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (req.query.date) <span class="Apple-converted-space">  </span>query = query.eq("date", req.query.date);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (req.query.status) query = query.eq("status", req.query.status);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const { data, error } = await query;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (error) throw error;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.json({ success: true, appointments: data });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch (err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── API: ACTUALIZAR ESTADO ────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.patch("/api/appointments/:id", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const { status, envelope_id, signature_status } = req.body;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const updates = { updated_at: new Date().toISOString() };</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (status !== undefined) updates.status = status;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (envelope_id !== undefined) updates.envelope_id = envelope_id;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (signature_status !== undefined) updates.signature_status = signature_status;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const { data, error } = await supabase</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.from("appointments")</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.update(updates)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.eq("id", req.params.id)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.select()</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.single();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (error) throw error;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.json({ success: true, appointment: data });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch (err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── API: ELIMINAR CITA ────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.delete("/api/appointments/:id", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const { error } = await supabase</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.from("appointments")</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.delete()</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.eq("id", req.params.id);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (error) throw error;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.json({ success: true });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch (err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── API: SUBIR DOCUMENTO ──────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.post("/api/upload", upload.single("file"), async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (!req.file) return res.status(400).json({ error: "No se recibio ningun archivo" });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const { clientName, appointmentId, docType } = req.body;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const folder <span class="Apple-converted-space">  </span>= "sosati/seal-services/" + (appointmentId || "general");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const publicId = (docType || "doc") + "-" + Date.now();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const result = await new Promise((resolve, reject) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const isPdf = req.file.mimetype === "application/pdf";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const stream = cloudinary.uploader.upload_stream(</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>{ folder, public_id: publicId, resource_type: isPdf ? "raw" : "image",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>tags: ["sosati", "seal-services", docType || "document"],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>context: { client_name: clientName || "", appointment_id: appointmentId || "", doc_type: docType || "other" }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>},</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>(err, result) =&gt; err ? reject(err) : resolve(result)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>stream.end(req.file.buffer);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.json({ success: true, url: result.secure_url, publicId: result.public_id, format: result.format, size: result.bytes });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch (err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.error("Upload error:", err);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── API: OBTENER DOCUMENTOS DE UNA CITA ──────────────────</span></p>
+<p class="p1"><span class="s1">app.get("/api/documents/:appointmentId", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const folder = "sosati/seal-services/" + req.params.appointmentId;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Fetch both image and raw resource types</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const [imgResult, rawResult] = await Promise.allSettled([</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cloudinary.api.resources({ type: "upload", resource_type: "image", prefix: folder, max_results: 50 }),</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cloudinary.api.resources({ type: "upload", resource_type: "raw", prefix: folder, max_results: 50 })</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>]);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const imgDocs = imgResult.status === "fulfilled" ? imgResult.value.resources : [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const rawDocs = rawResult.status === "fulfilled" ? rawResult.value.resources : [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const allDocs = [...imgDocs, ...rawDocs].map(r =&gt; ({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>url: r.secure_url,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>publicId: r.public_id,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>format: r.format,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>size: r.bytes,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>createdAt: r.created_at,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>resourceType: r.resource_type</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>allDocs.sort((a, b) =&gt; new Date(a.createdAt) - new Date(b.createdAt));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.json({ success: true, documents: allDocs });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch (err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── DOCUSIGN: JWT TOKEN ───────────────────────────────────</span></p>
+<p class="p1"><span class="s1">async function getDocuSignJWTToken() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const dsClient = new docusign.ApiClient();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>dsClient.setOAuthBasePath("account-d.docusign.com");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// Reconstruct private key as Buffer (Railway stores as single line base64 body)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const privateKeyRaw = process.env.DOCUSIGN_PRIVATE_KEY || "";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>let privateKeyStr;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if (privateKeyRaw.includes("-----BEGIN RSA PRIVATE KEY-----")) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>privateKeyStr = privateKeyRaw.replace(/\\n/g, "\n");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const body = privateKeyRaw.match(/.{1,64}/g).join("\n");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>privateKeyStr = "-----BEGIN RSA PRIVATE KEY-----\n" + body + "\n-----END RSA PRIVATE KEY-----\n";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const privateKey = Buffer.from(privateKeyStr);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const results = await dsClient.requestJWTUserToken(</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>process.env.DOCUSIGN_INTEGRATION_KEY,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>process.env.DOCUSIGN_USER_ID,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>["signature", "impersonation"],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>privateKey,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>3600</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>console.log("DocuSign token OK");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>return results.body.access_token;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── DOCUSIGN: ENVIAR SOBRE PARA FIRMA ────────────────────</span></p>
+<p class="p1"><span class="s1">app.post("/api/docusign/send", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const { appointmentId, clientName, clientEmail, documentUrl, documentName } = req.body;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (!clientEmail) return res.status(400).json({ error: "Se requiere email del cliente" });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Obtener token JWT</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("Getting DocuSign token...");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const accessToken = await getDocuSignJWTToken();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("Token obtained:", accessToken ? "YES" : "NO");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Configurar cliente</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const dsClient = new docusign.ApiClient();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>dsClient.addDefaultHeader("Authorization", "Bearer " + accessToken);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Generar URL correcta de Cloudinary segun tipo de archivo</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const ext = documentUrl.split(".").pop().toLowerCase().split("?")[0];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const fileExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "pdf";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const urlParts = documentUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let fetchUrl = documentUrl;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (urlParts) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const publicId = urlParts[1];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const resourceType = fileExt === "pdf" ? "raw" : "image";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// Use signed URL with correct resource type</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>fetchUrl = cloudinary.url(publicId, {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>resource_type: resourceType,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>sign_url: true,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>type: "upload",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>format: fileExt</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("Fetching doc from:", fetchUrl.substring(0, 100));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const docResponse = await fetch(fetchUrl);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("Doc fetch status:", docResponse.status, "content-type:", docResponse.headers.get("content-type"));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const docBuffer = await docResponse.arrayBuffer();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("Doc buffer size:", docBuffer.byteLength);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (docBuffer.byteLength === 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>return res.status(400).json({ error: "No se pudo descargar el documento de Cloudinary" });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const docBase64 = Buffer.from(docBuffer).toString("base64");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Crear documento</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const document = docusign.Document.constructFromObject({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>documentBase64: docBase64,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>name: documentName || "Documento",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>fileExtension: fileExt,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>documentId: "1"</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Crear firmante</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const signer = docusign.Signer.constructFromObject({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>email: clientEmail,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>name: clientName,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>recipientId: "1",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>routingOrder: "1"</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Crear sobre</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const envelope = docusign.EnvelopeDefinition.constructFromObject({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>emailSubject: "Seal Services — Documento para firmar",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>documents: [document],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>recipients: docusign.Recipients.constructFromObject({ signers: [signer] }),</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>status: "sent"</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("DocuSign accountId:", process.env.DOCUSIGN_ACCOUNT_ID);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("DocuSign documentUrl:", documentUrl);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("DocuSign clientEmail:", clientEmail);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.log("DocuSign basePath:", process.env.DOCUSIGN_BASE_URI + "/restapi");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const envelopesApi = new docusign.EnvelopesApi(dsClient);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const result = await envelopesApi.createEnvelope(</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>process.env.DOCUSIGN_ACCOUNT_ID,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ envelopeDefinition: envelope }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.json({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>success: true,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>envelopeId: result.envelopeId,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>status: result.status,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>message: "Documento enviado a " + clientEmail + " para firma"</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch (err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const detail = err.response?.body || err.message || String(err);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.error("DocuSign error status:", err.status || err.statusCode || "none");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.error("DocuSign error body:", JSON.stringify(err.response?.body));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.error("DocuSign error msg:", err.message);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message || "Error al enviar documento" });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── API: BORRAR DOCUMENTO ────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.delete("/api/documents/:publicId", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const publicId = decodeURIComponent(req.params.publicId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const resourceType = req.query.resourceType || "image";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (result.result === "ok" || result.result === "not found") {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>res.json({ success: true });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// Try the other resource type</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const alt = resourceType === "image" ? "raw" : "image";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const result2 = await cloudinary.uploader.destroy(publicId, { resource_type: alt });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>res.json({ success: true, result: result2 });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch (err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.error("Delete error:", err);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── DOCUSIGN: STATUS Y DOWNLOAD ──────────────────────────</span></p>
+<p class="p1"><span class="s1">app.get("/api/docusign/status/:envelopeId", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const accessToken = await getDocuSignJWTToken();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const dsClient = new docusign.ApiClient();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>dsClient.setBasePath(process.env.DOCUSIGN_BASE_URI + "/restapi");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>dsClient.addDefaultHeader("Authorization", "Bearer " + accessToken);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const envelopesApi = new docusign.EnvelopesApi(dsClient);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const result = await envelopesApi.getEnvelope(process.env.DOCUSIGN_ACCOUNT_ID, req.params.envelopeId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.json({ status: result.status, completedDateTime: result.completedDateTime });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch(err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.error("DocuSign status error:", err.message);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">app.get("/api/docusign/download/:envelopeId", async (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const accessToken = await getDocuSignJWTToken();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const url = process.env.DOCUSIGN_BASE_URI + "/restapi/v2.1/accounts/" +</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>process.env.DOCUSIGN_ACCOUNT_ID + "/envelopes/" + req.params.envelopeId + "/documents/combined";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const docRes = await fetch(url, {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>headers: { "Authorization": "Bearer " + accessToken }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (!docRes.ok) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>return res.status(docRes.status).json({ error: "No se pudo descargar" });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.setHeader("Content-Type", "application/pdf");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.setHeader("Content-Disposition", "attachment; filename=documento-firmado.pdf");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const buf = await docRes.arrayBuffer();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.send(Buffer.from(buf));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch(err) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.error("DocuSign download error:", err.message);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>res.status(500).json({ error: err.message });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── API: HEALTH CHECK ─────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.get("/api/health", (req, res) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>res.json({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>status: <span class="Apple-converted-space">    </span>"ok",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>service:<span class="Apple-converted-space">    </span>"SOSATI",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>supabase: <span class="Apple-converted-space">  </span>process.env.SUPABASE_URL ? "conectado" : "no configurado",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cloudinary: process.env.CLOUDINARY_CLOUD_NAME ? "conectado" : "no configurado",</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>time: <span class="Apple-converted-space">      </span>new Date().toISOString()</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ── START ─────────────────────────────────────────────────</span></p>
+<p class="p1"><span class="s1">app.listen(PORT, () =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>console.log("SOSATI corriendo en puerto " + PORT);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>console.log("Supabase: <span class="Apple-converted-space">  </span>" + (process.env.SUPABASE_URL ? "Conectado" : "No configurado"));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>console.log("Cloudinary: " + (process.env.CLOUDINARY_CLOUD_NAME ? "Conectado" : "No configurado"));</span></p>
+<p class="p1"><span class="s1">});</span></p>
 </body>
 </html>
