@@ -668,9 +668,9 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════
+<!-- =======================================================
      LOGIN SCREEN
-═══════════════════════════════════════════════════════ -->
+======================================================= -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo" style="padding:0;overflow:hidden"><img src="https://res.cloudinary.com/dhrb1bzxw/image/upload/v1773551137/seal-services-logo_r3yjqe.jpg" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
@@ -708,9 +708,9 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
+<!-- =======================================================
      ADMIN SCREEN
-═══════════════════════════════════════════════════════ -->
+======================================================= -->
 <div id="admin-screen">
 
   <!-- ADMIN HEADER -->
@@ -1078,9 +1078,9 @@
 <script src="sosati-core.js"></script>
 <script>
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // LOGIN
-// ══════════════════════════════════════════════════════
+// ======================================================
 function doLogin() {
   const pass = document.getElementById("inp-pass").value;
   const result = SOSATI.auth.login(pass);
@@ -1110,9 +1110,9 @@ function doLogout() {
   location.reload();
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // INIT
-// ══════════════════════════════════════════════════════
+// ======================================================
 function initAdmin() {
   // Apply role-based UI
   var isSecretary = SOSATI.auth.isSecretary();
@@ -1189,9 +1189,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // FILTERS
-// ══════════════════════════════════════════════════════
+// ======================================================
 function buildLocationFilter() {
   const sel = document.getElementById("filter-location");
   SOSATI.config.locations.forEach(l => {
@@ -1206,9 +1206,9 @@ function setDefaultDate() {
   document.getElementById("filter-date").value = SOSATI.utils.todayStr();
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // RENDER
-// ══════════════════════════════════════════════════════
+// ======================================================
 async function renderAll() {
   try {
     const result = await SOSATI.api.getAppointments();
@@ -1346,9 +1346,9 @@ function buildCard(a) {
   `;
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // ACTIONS
-// ══════════════════════════════════════════════════════
+// ======================================================
 async function changeStatus(id, status) {
   try { await SOSATI.api.updateStatus(id, status); } catch(err) { console.warn(err); }
   const all = SOSATI.storage.getAll();
@@ -1387,9 +1387,9 @@ function callClient(phone) {
   window.location.href = "tel:" + phone.replace(/\D/g, "");
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // MODAL
-// ══════════════════════════════════════════════════════
+// ======================================================
 let _modalCallback = null;
 
 function openModal(title, text, callback) {
@@ -1413,9 +1413,9 @@ document.getElementById("modal").addEventListener("click", (e) => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // TABS
-// ══════════════════════════════════════════════════════
+// ======================================================
 function switchTab(tab) {
   ['dashboard','citas','clientes','requisitos'].forEach(function(t) {
     var el = document.getElementById('tab-content-' + t);
@@ -1428,9 +1428,9 @@ function switchTab(tab) {
   if (tab === 'requisitos') renderRequisitos();
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // DASHBOARD
-// ══════════════════════════════════════════════════════
+// ======================================================
 var SERVICE_PRICES = { tax:150, accounting:120, dmv:50, insurance:80, notary:35, general:75 };
 var LOCS = ['belmont','ventura','kings'];
 var LOC_PREFIX = { belmont:'b', ventura:'v', kings:'k' };
@@ -1547,9 +1547,9 @@ function renderDashboard() {
   }
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // CRM — CLIENTES
-// ══════════════════════════════════════════════════════
+// ======================================================
 function renderClientes() {
   var all = SOSATI.storage.getAll();
 
@@ -1642,9 +1642,9 @@ function exportCSV() {
 }
 
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // CALENDAR VIEW (Secretary)
-// ══════════════════════════════════════════════════════
+// ======================================================
 var calWeekOffset = 0;
 var DAYS_ES = ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'];
 var MONTHS_CAL = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -1730,9 +1730,9 @@ function openApptDetail(id) {
   );
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // TOAST
-// ══════════════════════════════════════════════════════
+// ======================================================
 
 // REQUISITOS ADMIN
 window._reqItems = {};
