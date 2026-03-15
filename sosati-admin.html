@@ -922,13 +922,15 @@ function initAdmin() {
     document.getElementById("admin-citas-view").style.display = "none";
     document.getElementById("secretary-citas-view").style.display = "block";
     switchTab("citas");
-    renderCalendar();
   }
 
   buildLocationFilter();
   setDefaultDate();
   renderAll();
   if (SOSATI.auth.isAdmin()) renderDashboard();
+
+  // Auto-refresh every 30 seconds
+  setInterval(function() { renderAll(); }, 30000);
 
   // BroadcastChannel — recibir nuevas citas en tiempo real
   SOSATI.initBroadcast((msg) => {
@@ -1005,7 +1007,11 @@ async function renderAll() {
     }
   } catch(err) { console.warn('Usando datos locales:', err); }
   updateStats();
-  renderList();
+  if (SOSATI.auth.isSecretary()) {
+    renderCalendar();
+  } else {
+    renderList();
+  }
 }
 
 function updateStats() {
