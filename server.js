@@ -17,7 +17,13 @@ const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseKey = process.env.SUPABASE_KEY || "";
 let supabase = null;
 if (supabaseUrl && supabaseKey) {
-  supabase = createClient(supabaseUrl, supabaseKey);
+  supabase = createClient(supabaseUrl, supabaseKey, {
+    global: {
+      fetch: (url, options = {}) => {
+        return fetch(url, { ...options, signal: AbortSignal.timeout(30000) });
+      }
+    }
+  });
   console.log("Supabase: Conectado");
 } else {
   console.warn("Supabase: No configurado - usando modo local");
@@ -54,7 +60,13 @@ app.use(express.static(path.join(__dirname), {
 }));
 
 // Serve static assets under /seal-services/ path too
-app.use('/seal-services', express.static(path.join(__dirname)));
+app.use('/seal-services', express.static(path.join(__dirname), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  }
+}));
 
 // ── RUTAS HTML ────────────────────────────────────────────
 // ── LEGACY ROUTES (redirect to /seal-services) ──────────
@@ -386,11 +398,20 @@ app.get("/api/docusign/download/:envelopeId", async (req, res) => {
 });
 
 // ── API: HEALTH CHECK ─────────────────────────────────────
-app.get("/api/health", (req, res) => {
+app.get("/api/health", async (req, res) => {
+  let supabaseStatus = "no configurado";
+  let supabaseError = null;
+  try {
+    const { data, error } = await supabase.from("appointments").select("id").limit(1);
+    if (error) { supabaseStatus = "error"; supabaseError = error.message; }
+    else { supabaseStatus = "ok - " + (data ? data.length : 0) + " rows"; }
+  } catch(e) { supabaseStatus = "exception"; supabaseError = e.message; }
+  
   res.json({
     status:     "ok",
     service:    "SOSATI",
-    supabase:   process.env.SUPABASE_URL ? "conectado" : "no configurado",
+    supabase:   supabaseStatus,
+    supabaseError: supabaseError,
     cloudinary: process.env.CLOUDINARY_CLOUD_NAME ? "conectado" : "no configurado",
     time:       new Date().toISOString()
   });
