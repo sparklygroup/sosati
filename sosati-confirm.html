@@ -276,6 +276,18 @@
 
     .upload-btn-big:active { opacity: 0.85; transform: scale(0.97); }
 
+    .upload-btn-docs {
+      text-decoration: none;
+      background: linear-gradient(135deg, #1e3a5f 0%, #29156e 100%);
+    }
+
+    .upload-btn-sub {
+      font-size: 10px;
+      opacity: 0.75;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
     .upload-btn-icon { width: 52px; height: 52px; }
 
     .upload-btn-small {
@@ -468,12 +480,17 @@
 
 
       <div class="upload-layout">
-        <!-- LEFT: doc list by service -->
-        <div class="upload-doclist">
-          <div class="doclist-title">Documentos</div>
-          <div class="doclist-note">Varían según el trámite</div>
-          <a href="/seal-services/requisitos" class="doclist-reqlink">Ver todos los requisitos →</a>
-          <ul class="doclist-items" id="doclist-items"></ul>
+        <!-- LEFT: Documentación button -->
+        <div class="upload-actions">
+          <a href="/seal-services/requisitos" target="_blank" class="upload-btn-big upload-btn-docs">
+            <svg class="upload-btn-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 4h10l8 8v20H10V4z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M20 4v8h8" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M15 18h8M15 23h6" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Documentación</span>
+            <span class="upload-btn-sub" id="doclist-count">Ver requisitos →</span>
+          </a>
         </div>
 
         <!-- RIGHT: camera + file buttons -->
@@ -494,6 +511,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Hidden doc list still needed for smart count -->
+      <ul id="doclist-items" style="display:none"></ul>
 
       <!-- Security footer -->
       <div class="upload-security-footer">
@@ -593,6 +613,11 @@
       docListEl.innerHTML = docs.map(function(d) {
         return '<li>' + d + '</li>';
       }).join("");
+    }
+    // Update docs button count
+    var countEl = document.getElementById("doclist-count");
+    if (countEl && docs.length) {
+      countEl.textContent = docs.length + " documento" + (docs.length !== 1 ? "s" : "") + " requeridos";
     }
   }
 
