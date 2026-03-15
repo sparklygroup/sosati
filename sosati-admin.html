@@ -1864,7 +1864,7 @@ function renderAdminCalendar() {
     var cards = dayAppts.length ? dayAppts.map(function(a) {
       var color = locColors[a.location] || 'var(--brand)';
       var locLabel = !filterLoc ? (' - ' + (locNames[a.location] || '')) : '';
-      return '<div style="background:#f5f3ff;border-left:3px solid ' + color + ';border-radius:6px;padding:6px 8px;cursor:pointer;margin-bottom:4px" onclick="openApptDetail('' + a.id + '')">' +
+      return '<div style="background:#f5f3ff;border-left:3px solid ' + color + ';border-radius:6px;padding:6px 8px;cursor:pointer;margin-bottom:4px" onclick="openApptDetail('" + a.id + "')">' +
         '<div style="font-size:10px;color:#9ca3af;font-weight:600">' + a.time + locLabel + '</div>' +
         '<div style="font-size:12px;font-weight:700;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + a.name + '</div>' +
         '<div style="font-size:10.5px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (a.serviceLabel || '') + '</div>' +
