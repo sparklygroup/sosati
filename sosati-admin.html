@@ -1552,7 +1552,7 @@ function openApptDetail(id) {
 // ══════════════════════════════════════════════════════
 // REQUISITOS ADMIN
 // ══════════════════════════════════════════════════════
-var SVC_NAMES = { tax:"Impuestos", accounting:"Contabilidad", dmv:"DMV / Vehículos", insurance:"Aseguranza", notary:"Notario", general:"Asesoría" };
+var SVC_NAMES = { tax:"Impuestos", accounting:"Contabilidad", dmv:"DMV / Vehiculos", insurance:"Aseguranza", notary:"Notario", general:"Asesoria" };
 
 async function renderRequisitos() {
   var service = document.getElementById("req-filter-service").value;
@@ -1565,30 +1565,1970 @@ async function renderRequisitos() {
     var items = data.requirements || [];
 
     if (!items.length) {
-      list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray-400)">No hay requisitos para este servicio.<br>Agrega el primero.</div>';
+      list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray-400)">No hay requisitos. Agrega el primero.</div>';
       return;
     }
 
-    list.innerHTML = items.map(function(r) {
+    window._reqItems = {};
+    items.forEach(function(r){ window._reqItems[r.id] = r; });
+
+    var html = "";
+    items.forEach(function(r) {
       var isReq = r.badge === "Requerido";
-      return '<div class="req-admin-item">' +
-        '<div class="req-admin-dot' + (isReq ? "" : " optional") + '"></div>' +
-        '<div class="req-admin-name">' + r.item + '</div>' +
-        '<div class="req-admin-badge' + (isReq ? "" : " optional") + '">' + r.badge + '</div>' +
-        '<div class="req-admin-actions">' +
-          '<button class="req-icon-btn" onclick="editReq('' + r.id + '','' + r.item.replace(/'/g,"\'") + '','' + r.badge + '')" title="Editar">' +
-            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>' +
-          '</button>' +
-          '<button class="req-icon-btn delete" onclick="deleteReq('' + r.id + '')" title="Borrar">' +
-            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+      var dotCls = isReq ? "req-admin-dot" : "req-admin-dot optional";
+      var badgeCls = isReq ? "req-admin-badge" : "req-admin-badge optional";
+      html += "<div class='req-admin-item'>";
+      html += "<div class='" + dotCls + "'></div>";
+      html += "<div class='req-admin-name'>" + r.item + "</div>";
+      html += "<div class='" + badgeCls + "'>" + r.badge + "</div>";
+      html += "<div class='req-admin-actions'>";
+      html += "<button class='req-icon-btn' data-id='" + r.id + "' onclick='editReqById(this.getAttribute("data-id"))' title='Editar'>";
+      html += "<svg width='14' height='14' viewBox='0 0 16 16' fill='none'><path d='M11 2l3 3-8 8H3v-3l8-8z' stroke='currentColor' stroke-width='1.5' stroke-linejoin='round'/></svg>";
+      html += "</button>";
+      html += "<button class='req-icon-btn delete' data-id='" + r.id + "' onclick='deleteReq(this.getAttribute("data-id"))' title='Borrar'>";
+      html += "<svg width='14' height='14' viewBox='0 0 16 16' fill='none'><path d='M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>";
+      html += "</button>";
+      html += "</div></div>";
+    });
+    list.innerHTML = html;
+
   } catch(err) {
     list.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error cargando requisitos</div>';
   }
 }
+
+function openAddReq() {
+  document.getElementById("req-modal-title").textContent = "Agregar requisito";
+  document.getElementById("req-edit-id").value = "";
+  document.getElementById("req-item").value = "";
+  document.getElementById("req-badge").value = "Requerido";
+  document.getElementById("req-modal").style.display = "flex";
+}
+
+function editReqById(id) {
+  var r = window._reqItems && window._reqItems[id];
+  if (!r) return;
+  document.getElementById("req-modal-title").textContent = "Editar requisito";
+  document.getElementById("req-edit-id").value = r.id;
+  document.getElementById("req-item").value = r.item;
+  document.getElementById("req-badge").value = r.badge;
+  document.getElementById("req-modal").style.display = "flex";
+}
+
+function closeReqModal() {
+  document.getElementById("req-modal").style.display = "none";
+}
+
+async function saveReq() {
+  var id = document.getElementById("req-edit-id").value;
+  var item = document.getElementById("req-item").value.trim();
+  var badge = document.getElementById("req-badge").value;
+  var service = document.getElementById("req-filter-service").value;
+
+  if (!item) { showToast("Ingresa el nombre del documento", "error"); return; }
+
+  try {
+    var url = id ? "/api/requirements/" + id : "/api/requirements";
+    var method = id ? "PATCH" : "POST";
+    var body = id ? { item, badge } : { service_id: service, item, badge, client_id: "seal-services" };
+
+    var resp = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    var data = await resp.json();
+    if (!data.success) throw new Error(data.error);
+
+    closeReqModal();
+    renderRequisitos();
+    showToast(id ? "Requisito actualizado" : "Requisito agregado", "success");
+  } catch(err) {
+    showToast("Error: " + err.message, "error");
+  }
+}
+
+async function deleteReq(id) {
+  if (!confirm("¿Borrar este requisito?")) return;
+  try {
+    var resp = await fetch("/api/requirements/" + id, { method: "DELETE" });
+    var data = await resp.json();
+    if (!data.success) throw new Error(data.error);
+    renderRequisitos();
+    showToast("Requisito eliminado", "success");
+  } catch(err) {
+    showToast("Error: " + err.message, "error");
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════
+function showToast(msg, type = "info") {
+  const t = document.getElementById("sosati-toast");
+  t.textContent = msg;
+  t.className   = `show ${type}`;
+  setTimeout(() => { t.className = ""; }, 3500);
+}
+</script>
+
+<!-- DOCS MODAL -->
+<div id="docs-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.85);padding:20px;overflow-y:auto">
+  <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden">
+    <div style="background:var(--brand);padding:18px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="color:#fff;font-weight:700;font-size:16px" id="docs-modal-title">Documentos</div>
+        <div style="color:rgba(255,255,255,0.7);font-size:12px" id="docs-modal-id"></div>
+      </div>
+      <button onclick="closeDocsModal()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px">✕ Cerrar</button>
+    </div>
+    <div style="padding:20px">
+      <div id="docs-modal-body" style="min-height:100px;text-align:center;color:var(--gray-400)">
+        Cargando documentos...
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+        <button onclick="printDocs()" style="background:var(--gray-100);color:var(--gray-700);border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">🖨️ Imprimir</button>
+        <label style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px">
+          📤 Subir documento
+          <input type="file" id="admin-upload-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="adminUploadDoc(this)">
+        </label>
+        <button onclick="sendForSignature()" style="background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px">✍️ Enviar para firmar</button>
+        <button id="btn-download-signed" onclick="downloadSigned()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px;display:none;align-items:center;gap:6px">📥 Descargar firmado</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentDocs = [];
+
+async function viewDocs(apptId, clientName) {
+  document.getElementById('docs-modal-title').textContent = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 1h6l4 4v10H2V1h2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 1v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Documentos — ' + clientName;
+  document.getElementById('docs-modal-id').textContent = apptId;
+  document.getElementById('docs-modal-body').innerHTML = '<div style="padding:20px">Cargando...</div>';
+  document.getElementById('docs-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  // Check if appointment has envelope_id
+  var all = SOSATI.storage.getAll ? SOSATI.storage.getAll() : [];
+  var appt = all.find(function(a){ return a.id === apptId; });
+  var dlBtn = document.getElementById('btn-download-signed');
+  if (appt && appt.envelope_id) {
+    dlBtn.style.display = 'inline-flex';
+    dlBtn.dataset.envelopeId = appt.envelope_id;
+  } else {
+    dlBtn.style.display = 'none';
+    dlBtn.dataset.envelopeId = '';
+  }
+
+  try {
+    const res = await fetch('/api/documents/' + apptId);
+    const data = await res.json();
+    currentDocs = data.documents || [];
+
+    if (!currentDocs.length) {
+      document.getElementById('docs-modal-body').innerHTML =
+        '<div style="padding:30px;color:var(--gray-400)">📂 No hay documentos subidos para esta cita.</div>';
+      return;
+    }
+
+    const html = currentDocs.map(function(doc, i) {
+      var isImg = /\.(jpg|jpeg|png|webp)$/i.test(doc.url);
+      var kb = Math.round(doc.size / 1024);
+      var fname = doc.url.split('/').pop();
+      // Fix PDF URL: Cloudinary PDFs need /raw/upload/ not /image/upload/
+      var openUrl = doc.url;
+      if (!isImg) {
+        openUrl = doc.url.replace('/image/upload/', '/raw/upload/');
+      }
+      var deleteBtn = '<button onclick="deleteDoc(\'' + doc.publicId + '\', ' + i + ')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:600">🗑️</button>';
+      if (isImg) {
+        return '<div style="margin-bottom:16px;border:1px solid #eee;border-radius:12px;overflow:hidden">' +
+          '<img src="' + doc.url + '" style="width:100%;display:block;cursor:pointer" onclick="window.open(\'' + doc.url + '\',\'_blank\')" />' +
+          '<div style="padding:8px 12px;background:#f9f9f9;display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="font-size:12px;color:#666">🖼️ Imagen · ' + kb + ' KB</span>' +
+          '<div style="display:flex;gap:8px;align-items:center">' +
+          '<a href="' + doc.url + '" target="_blank" style="font-size:12px;color:var(--brand);font-weight:600">Ver ↗</a>' +
+          deleteBtn + '</div></div></div>';
+      } else {
+        return '<div style="margin-bottom:12px;padding:14px;border:1px solid #eee;border-radius:10px;display:flex;align-items:center;gap:12px">' +
+          '<span style="font-size:28px">📄</span>' +
+          '<div style="flex:1"><div style="font-weight:600;font-size:14px">' + fname + '</div>' +
+          '<div style="font-size:12px;color:#999">' + kb + ' KB</div></div>' +
+          '<div style="display:flex;gap:8px">' +
+          '<a href="' + openUrl + '" target="_blank" style="background:var(--brand);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">Abrir ↗</a>' +
+          deleteBtn + '</div></div>';
+      }
+    }).join('');
+
+    document.getElementById('docs-modal-body').innerHTML = html;
+  } catch(err) {
+    document.getElementById('docs-modal-body').innerHTML =
+      '<div style="padding:20px;color:red">Error al cargar documentos: ' + err.message + '</div>';
+  }
+}
+
+function closeDocsModal() {
+  document.getElementById('docs-modal').style.display = 'none';
+  document.body.style.overflow = '';
+  currentDocs = [];
+}
+
+function printDocs() {
+  var imgUrls = currentDocs.filter(function(d){ return /\.(jpg|jpeg|png|webp)$/i.test(d.url); }).map(function(d){ return d.url; });
+  if (!imgUrls.length) { alert('No hay imágenes para imprimir.'); return; }
+  var w = window.open('', '_blank');
+  w.document.write('<html><head><title>Documentos SOSATI</title><style>body{margin:0}img{width:100%;page-break-after:always;display:block}</style></head><body>');
+  imgUrls.forEach(function(url){ w.document.write('<img src="' + url + '" />'); });
+  w.document.write('</body></html>');
+  w.document.close();
+  w.onload = function(){ w.print(); };
+}
+
+// Close modal on backdrop click
+document.getElementById('docs-modal').addEventListener('click', function(e){
+  if (e.target === this) closeDocsModal();
+});
+
+async function deleteDoc(publicId, index) {
+  if (!confirm('¿Borrar este documento?')) return;
+  try {
+    const doc = currentDocs[index];
+    const resourceType = doc.resourceType || 'image';
+    const res = await fetch('/api/documents/' + encodeURIComponent(publicId) + '?resourceType=' + resourceType, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      currentDocs.splice(index, 1);
+      showToast('Documento eliminado', 'success');
+      var apptId = document.getElementById('docs-modal-id').textContent;
+      var clientName = document.getElementById('docs-modal-title').textContent.replace('<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 1h6l4 4v10H2V1h2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 1v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Documentos — ', '');
+      await viewDocs(apptId, clientName);
+    } else {
+      showToast('Error al borrar: ' + (data.error || 'No se pudo borrar'), 'error');
+    }
+  } catch(err) {
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+
+async function adminUploadDoc(input) {
+  var apptId = document.getElementById('docs-modal-id').textContent;
+  var clientName = document.getElementById('docs-modal-title').textContent.replace('<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 1h6l4 4v10H2V1h2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 1v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Documentos — ', '');
+  var file = input.files[0];
+  if (!file) return;
+
+  showToast('Subiendo documento...', 'info');
+
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('appointmentId', apptId);
+  formData.append('clientName', clientName);
+  formData.append('docType', 'admin-doc');
+
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Documento subido correctamente', 'success');
+      // Reload docs
+      await viewDocs(apptId, clientName);
+    } else {
+      showToast('Error: ' + (data.error || 'No se pudo subir'), 'error');
+    }
+  } catch(err) {
+    showToast('Error al subir: ' + err.message, 'error');
+  }
+  input.value = '';
+}
+
+async function sendForSignature() {
+  var apptId = document.getElementById('docs-modal-id').textContent;
+  var clientName = document.getElementById('docs-modal-title').textContent.replace('<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 1h6l4 4v10H2V1h2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 1v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Documentos — ', '');
+
+  // Get appointment email
+  var all = SOSATI.storage.getAll();
+  var appt = all.find(function(a){ return a.id === apptId; });
+  var clientEmail = appt ? appt.email : '';
+
+  if (!clientEmail) {
+    var email = prompt('El cliente no tiene email registrado. Ingresa el email para enviar el documento:');
+    if (!email) return;
+    clientEmail = email;
+  }
+
+  // Get image docs
+  var imgDocs = currentDocs.filter(function(d){ return /\.(jpg|jpeg|png|webp)$/i.test(d.url); });
+  var allDocs = currentDocs;
+
+  if (!allDocs.length) {
+    showToast('No hay documentos para enviar', 'error');
+    return;
+  }
+
+  // Let admin pick which doc to send
+  var doc = allDocs[0]; // Send first doc by default
+  if (allDocs.length > 1) {
+    var options = allDocs.map(function(d, i){ return (i+1) + '. ' + d.url.split('/').pop(); }).join('\n');
+    var pick = prompt('¿Cuál documento enviar para firma?\n' + options + '\n\nIngresa el número:');
+    if (pick && parseInt(pick) > 0 && parseInt(pick) <= allDocs.length) {
+      doc = allDocs[parseInt(pick) - 1];
+    }
+  }
+
+  showToast('Enviando documento a ' + clientEmail + '...', 'info');
+
+  try {
+    const res = await fetch('/api/docusign/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        appointmentId: apptId,
+        clientName: clientName,
+        clientEmail: clientEmail,
+        documentUrl: doc.url,
+        documentName: doc.url.split('/').pop()
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Documento enviado a ' + clientEmail + ' para firma', 'success');
+      // Save envelopeId to appointment
+      await fetch('/api/appointments/' + apptId, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ envelope_id: data.envelopeId, signature_status: 'sent' })
+      });
+      // Show download button
+      document.getElementById('btn-download-signed').style.display = 'inline-flex';
+      document.getElementById('btn-download-signed').dataset.envelopeId = data.envelopeId;
+    } else {
+      showToast('Error: ' + (data.error || 'No se pudo enviar'), 'error');
+    }
+  } catch(err) {
+    showToast('Error al enviar: ' + err.message, 'error');
+  }
+}
+
+async function downloadSigned() {
+  var btn = document.getElementById('btn-download-signed');
+  var envelopeId = btn.dataset.envelopeId;
+  var apptId = document.getElementById('docs-modal-id').textContent;
+
+  // Check status first
+  showToast('Verificando estado de firma...', 'info');
+  try {
+    const res = await fetch('/api/docusign/status/' + envelopeId);
+    const data = await res.json();
+
+    if (data.status === 'completed') {
+      showToast('Descargando documento firmado...', 'info');
+      const dlRes = await fetch('/api/docusign/download/' + envelopeId);
+      if (dlRes.ok) {
+        const blob = await dlRes.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'firmado-' + apptId + '.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('✅ Documento firmado descargado', 'success');
+        // Update status
+        await fetch('/api/appointments/' + apptId, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ signature_status: 'completed' })
+        });
+      } else {
+        showToast('Error al descargar', 'error');
+      }
+    } else {
+      showToast('El cliente aún no ha firmado. Estado: ' + (data.status || 'pendiente'), 'info');
+    }
+  } catch(err) {
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+</script>
+</body>
+</html>    // Store items for editing
+    window._reqItems = {};
+    items.forEach(function(r){ window._reqItems[r.id] = r; });
+
+    list.innerHTML = items.map(function(r) {
+      var isReq = r.badge === "Requerido";
+      var dotCls = isReq ? "req-admin-dot" : "req-admin-dot optional";
+      var badgeCls = isReq ? "req-admin-badge" : "req-admin-badge optional";
+      var div = document.createElement("div");
+      div.className = "req-admin-item";
+      div.innerHTML = [
+        '<div class="' + dotCls + '"></div>',
+        '<div class="req-admin-name">' + r.item + '</div>',
+        '<div class="' + badgeCls + '">' + r.badge + '</div>',
+        '<div class="req-admin-actions">',
+          '<button class="req-icon-btn" data-id="' + r.id + '" onclick="editReqById(this.getAttribute('data-id'))" title="Editar">',
+            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+          '</button>',
+          '<button class="req-icon-btn delete" data-id="' + r.id + '" onclick="deleteReq(this.getAttribute('data-id'))" title="Borrar">',
+            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          '</button>',
+        '</div>'
+      ].join('');
+      return div.outerHTML;
+    }).join('');
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#29156e" />
+  <title>Admin — Seal Services</title>
+  <link rel="stylesheet" href="sosati-style.css" />
+  <style>
+    /* ── LOGIN SCREEN ─────────────────────────────────────── */
+    #login-screen {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--brand-dark) 0%, var(--brand) 50%, var(--brand-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .login-logo {
+      width: 70px; height: 70px;
+      background: var(--brand);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 30px;
+      color: var(--white);
+      font-weight: 700;
+      margin: 0 auto 20px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .login-card h2 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+
+    .login-card p {
+      font-size: 13px;
+      color: var(--gray-400);
+      margin-bottom: 28px;
+    }
+
+    .login-error {
+      background: #fee2e2;
+      color: #dc2626;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* ── ADMIN SCREEN ──────────────────────────────────────── */
+    #admin-screen { display: none; }
+
+    .admin-header {
+      background: var(--brand);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(41,21,110,0.3);
+    }
+
+    .admin-header-left { display: flex; align-items: center; gap: 12px; }
+    .admin-logo {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 18px; font-weight: 700;
+      color: var(--white);
+    }
+    .admin-header-title { font-size: 15px; color: var(--white); font-weight: 600; }
+    .admin-header-sub   { font-size: 11px; color: rgba(255,255,255,0.65); }
+
+    .logout-btn {
+      background: rgba(255,255,255,0.15);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: var(--radius-full);
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font-body);
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── STATS BAR ──────────────────────────────────────────── */
+    .stats-bar {
+      background: var(--white);
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      border-bottom: 1px solid var(--gray-100);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 8px 4px;
+    }
+
+    .stat-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--brand);
+      font-family: var(--font-display);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 3px;
+    }
+
+    /* ── FILTERS ────────────────────────────────────────────── */
+    .filters-bar {
+      background: var(--white);
+      padding: 14px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid var(--gray-100);
+      flex-wrap: wrap;
+      position: sticky;
+      top: 64px;
+      z-index: 90;
+    }
+
+    .filter-select {
+      flex: 1;
+      min-width: 130px;
+      padding: 9px 32px 9px 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--gray-800);
+      background: var(--white);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2329156e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      -webkit-appearance: none;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .filter-select:focus { border-color: var(--brand); }
+
+    .date-filter {
+      padding: 9px 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--gray-800);
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+    }
+
+    .date-filter:focus { border-color: var(--brand); }
+
+    .refresh-btn {
+      background: var(--brand-soft);
+      color: var(--brand);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 9px 14px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: var(--transition);
+      line-height: 1;
+    }
+    .refresh-btn:hover { background: var(--brand); color: var(--white); }
+
+    /* ── APPOINTMENTS LIST ──────────────────────────────────── */
+    .appts-container {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Override appt-card for admin */
+    .appt-card { cursor: default; }
+
+    .appt-phone-link {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .appt-notes-text {
+      font-size: 12px;
+      color: var(--gray-600);
+      background: var(--gray-50);
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--brand-soft);
+      margin-top: 4px;
+    }
+
+    /* ── LIVE DOT ─────────────────────────────────────────── */
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .live-dot {
+      width: 8px; height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* ── NEW CITA FLASH ──────────────────────────────────────── */
+    @keyframes newCitaFlash {
+      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); }
+      70%  { box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+
+    .appt-card.new-flash {
+      animation: newCitaFlash 1s ease 3, fadeUp 0.3s ease;
+      border-color: var(--success) !important;
+    }
+
+    /* ── MODAL CONFIRM ──────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-box {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: fadeUp 0.3s ease;
+    }
+
+    .modal-title { font-family: var(--font-display); font-size: 18px; color: var(--brand); margin-bottom: 8px; }
+    .modal-text  { font-size: 14px; color: var(--gray-600); margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; }
+
+    /* ── TABS ───────────────────────────────────────────────── */
+    .admin-tabs {
+      display: flex;
+      align-items: center;
+      background: var(--white);
+      border-bottom: 2px solid var(--gray-100);
+      padding: 0 20px;
+      gap: 4px;
+      position: sticky;
+      top: 64px;
+      z-index: 90;
+    }
+
+    .admin-tab {
+      padding: 14px 20px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-400);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .admin-tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+    .admin-tab:hover { color: var(--brand); }
+
+    /* ── OFFICE GRID ────────────────────────────────────────── */
+    .office-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      padding: 20px 20px 0;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .office-grid { grid-template-columns: 1fr; }
+    }
+
+    .office-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100);
+    }
+
+    .office-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .office-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .office-name {
+      font-family: var(--font-display);
+      font-size: 16px;
+      color: var(--brand);
+      font-weight: 700;
+    }
+
+    .office-address {
+      width: 100%;
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: -4px;
+    }
+
+    .office-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .office-stat {
+      text-align: center;
+      background: var(--gray-50);
+      border-radius: 8px;
+      padding: 8px 4px;
+    }
+
+    .ostat-num {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--brand);
+      font-family: var(--font-display);
+      line-height: 1;
+    }
+
+    .ostat-num.green { color: #16a34a; }
+
+    .ostat-label {
+      display: block;
+      font-size: 10px;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-top: 3px;
+    }
+
+    .office-top-service {
+      font-size: 12px;
+      color: var(--gray-600);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .office-bar-wrap {
+      height: 5px;
+      background: var(--gray-100);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .office-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), #7c3aed);
+      border-radius: 99px;
+      transition: width 0.8s ease;
+    }
+
+    /* ── CONTROL CENTER ─────────────────────────────────────── */
+    .control-center {
+      margin: 16px 20px 20px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100);
+      overflow: hidden;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cc-header {
+      background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
+      padding: 18px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .cc-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .cc-subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .cc-body {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+    }
+
+    @media (max-width: 768px) {
+      .cc-body { grid-template-columns: 1fr; }
+    }
+
+    .cc-rankings {
+      padding: 20px;
+      border-right: 1px solid var(--gray-100);
+    }
+
+    .cc-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--gray-400);
+      margin-bottom: 10px;
+    }
+
+    .cc-rank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cc-rank-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cc-rank-pos {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--brand);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .cc-rank-pos.gold   { background: #f59e0b; }
+    .cc-rank-pos.silver { background: #94a3b8; }
+    .cc-rank-pos.bronze { background: #b45309; }
+
+    .cc-rank-info { flex: 1; }
+    .cc-rank-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .cc-rank-count { font-size: 11px; color: var(--gray-400); }
+
+    .cc-rank-arrow { font-size: 16px; }
+
+    .cc-star-service {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--brand);
+      font-family: var(--font-display);
+    }
+
+    .cc-total-profit {
+      font-size: 28px;
+      font-weight: 700;
+      color: #16a34a;
+      font-family: var(--font-display);
+      line-height: 1;
+    }
+
+    .cc-profit-sub {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 4px;
+    }
+
+    .cc-chart {
+      padding: 20px 24px;
+    }
+
+    .cc-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 140px;
+      margin-top: 12px;
+    }
+
+    .cc-bar-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .cc-bar-cols {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      width: 100%;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .cc-bar-col {
+      width: 10px;
+      border-radius: 3px 3px 0 0;
+      min-height: 3px;
+      transition: height 0.6s ease;
+    }
+
+    .cc-bar-col.loc-b { background: var(--brand); }
+    .cc-bar-col.loc-v { background: #7c3aed; }
+    .cc-bar-col.loc-k { background: #06b6d4; }
+
+    .cc-bar-month {
+      font-size: 10px;
+      color: var(--gray-400);
+      text-align: center;
+    }
+
+    .cc-legend {
+      display: flex;
+      gap: 14px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cc-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--gray-600);
+    }
+
+    .cc-legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── CALENDAR ──────────────────────────────────────────── */
+    .cal-toolbar {
+      background: var(--white);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .cal-week-label { flex:1; text-align:center; font-size:14px; font-weight:700; color:var(--brand); font-family:var(--font-display); }
+    .cal-nav-btn { background:var(--brand-soft); color:var(--brand); border:none; border-radius:8px; padding:7px 10px; cursor:pointer; display:flex; align-items:center; transition:var(--transition); }
+    .cal-nav-btn:hover { background:var(--brand); color:#fff; }
+    .cal-today-btn { background:var(--brand); color:#fff; border:none; border-radius:8px; padding:7px 14px; font-family:var(--font-body); font-size:12px; font-weight:600; cursor:pointer; }
+    .cal-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0; padding:0 0 40px; overflow-x:auto; }
+    .cal-col { border-right:1px solid var(--gray-100); min-width:100px; }
+    .cal-col:last-child { border-right:none; }
+    .cal-col-header { padding:10px 8px 8px; text-align:center; background:var(--white); border-bottom:2px solid var(--gray-100); }
+    .cal-col-header.today .cal-day-num { background:var(--brand); color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:16px; }
+    .cal-day-name { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--gray-400); }
+    .cal-day-num { font-size:20px; font-weight:700; color:var(--brand); font-family:var(--font-display); line-height:1.2; }
+    .cal-col-body { padding:8px 6px; min-height:200px; display:flex; flex-direction:column; gap:6px; }
+    .cal-appt-card { background:var(--brand-soft); border-left:3px solid var(--brand); border-radius:6px; padding:7px 8px; cursor:pointer; transition:var(--transition); }
+    .cal-appt-card:hover { background:var(--brand); color:#fff; }
+    .cal-appt-card.status-confirmed { border-left-color:#10b981; background:#ecfdf5; }
+    .cal-appt-card.status-cancelled { border-left-color:#ef4444; background:#fef2f2; opacity:0.6; }
+    .cal-appt-card.status-completed { border-left-color:#6366f1; background:#eef2ff; }
+    .cal-appt-time { font-size:10px; color:var(--gray-400); font-weight:600; margin-bottom:2px; }
+    .cal-appt-name { font-size:12px; font-weight:700; color:var(--gray-800); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cal-appt-svc { font-size:10.5px; color:var(--gray-500); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cal-col-footer { padding:8px; border-top:2px solid var(--gray-100); text-align:center; background:var(--gray-50); }
+    .cal-col-count { font-size:11px; font-weight:700; color:var(--brand); }
+    .cal-empty { font-size:11px; color:var(--gray-300); text-align:center; padding:16px 0; font-style:italic; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo" style="padding:0;overflow:hidden"><img src="https://res.cloudinary.com/dhrb1bzxw/image/upload/v1773551137/seal-services-logo_r3yjqe.jpg" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+    <h2>Seal Services</h2>
+    <p>Panel de administración — SOSATI</p>
+
+    <div class="form-group" id="fg-pass">
+      <label class="form-label" for="inp-pass">Contraseña de acceso</label>
+      <input class="form-input" type="password" id="inp-pass"
+        placeholder="••••••••"
+        onkeydown="if(event.key==='Enter') doLogin()" />
+      <div class="form-error">Contraseña incorrecta. Intenta de nuevo.</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="doLogin()">
+      Entrar al panel →
+    </button>
+
+    <p style="font-size:11.5px;color:var(--gray-400);margin-top:16px">
+      🔒 Acceso restringido al personal de Seal Services
+    </p>
+  </div>
+</div>
+
+<!-- OFFICE SELECTOR (secretary only) -->
+<div id="office-selector" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:32px 24px;width:90%;max-width:340px;text-align:center">
+    <div style="font-family:var(--font-display);font-size:20px;color:var(--brand);margin-bottom:8px">¿Cuál es tu oficina?</div>
+    <p style="font-size:13px;color:var(--gray-500);margin-bottom:20px">Selecciona tu sucursal para continuar</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" onclick="setSecretaryOffice('belmont')">Belmont Ave</button>
+      <button class="btn btn-secondary" onclick="setSecretaryOffice('ventura')">Ventura Blvd</button>
+      <button class="btn btn-secondary" onclick="setSecretaryOffice('kings')">Kings Canyon</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ADMIN SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="admin-screen">
+
+  <!-- ADMIN HEADER -->
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <div class="admin-logo" style="padding:0;overflow:hidden"><img src="https://res.cloudinary.com/dhrb1bzxw/image/upload/v1773551137/seal-services-logo_r3yjqe.jpg" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+      <div>
+        <div class="admin-header-title" id="header-title">Seal Services · Admin</div>
+        <div class="admin-header-sub">
+          <span class="live-indicator">
+            <span class="live-dot"></span>En vivo
+          </span>
+        </div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Salir</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" id="tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="admin-tab" id="tab-citas" onclick="switchTab('citas')">Citas</button>
+    <button class="admin-tab" id="tab-clientes" onclick="switchTab('clientes')">Clientes</button>
+    <button class="admin-tab" id="tab-requisitos" onclick="switchTab('requisitos')">Requisitos</button>
+    <button class="refresh-btn" onclick="renderAll()" title="Actualizar" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.87 4.4 2.2L14 3v4h-4l1.5-1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+
+  <!-- TAB: DASHBOARD -->
+  <div id="tab-content-dashboard">
+    <!-- 3 office cards -->
+    <div class="office-grid">
+      <div class="office-card" id="office-belmont">
+        <div class="office-card-header">
+          <div class="office-dot"></div>
+          <div class="office-name">Belmont Ave</div>
+          <div class="office-address">3270 E. Belmont Ave</div>
+        </div>
+        <div class="office-stats">
+          <div class="office-stat"><span class="ostat-num" id="ob-today">0</span><span class="ostat-label">Hoy</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ob-week">0</span><span class="ostat-label">Semana</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ob-month">0</span><span class="ostat-label">Mes</span></div>
+          <div class="office-stat"><span class="ostat-num green" id="ob-profit">$0</span><span class="ostat-label">Estimado</span></div>
+        </div>
+        <div class="office-top-service" id="ob-top">— sin citas —</div>
+        <div class="office-bar-wrap"><div class="office-bar" id="ob-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="office-card" id="office-ventura">
+        <div class="office-card-header">
+          <div class="office-dot"></div>
+          <div class="office-name">Ventura Blvd</div>
+          <div class="office-address">3259 E. Ventura Blvd</div>
+        </div>
+        <div class="office-stats">
+          <div class="office-stat"><span class="ostat-num" id="ov-today">0</span><span class="ostat-label">Hoy</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ov-week">0</span><span class="ostat-label">Semana</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ov-month">0</span><span class="ostat-label">Mes</span></div>
+          <div class="office-stat"><span class="ostat-num green" id="ov-profit">$0</span><span class="ostat-label">Estimado</span></div>
+        </div>
+        <div class="office-top-service" id="ov-top">— sin citas —</div>
+        <div class="office-bar-wrap"><div class="office-bar" id="ov-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="office-card" id="office-kings">
+        <div class="office-card-header">
+          <div class="office-dot"></div>
+          <div class="office-name">Kings Canyon</div>
+          <div class="office-address">4244 E. Kings Canyon Rd</div>
+        </div>
+        <div class="office-stats">
+          <div class="office-stat"><span class="ostat-num" id="ok-today">0</span><span class="ostat-label">Hoy</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ok-week">0</span><span class="ostat-label">Semana</span></div>
+          <div class="office-stat"><span class="ostat-num" id="ok-month">0</span><span class="ostat-label">Mes</span></div>
+          <div class="office-stat"><span class="ostat-num green" id="ok-profit">$0</span><span class="ostat-label">Estimado</span></div>
+        </div>
+        <div class="office-top-service" id="ok-top">— sin citas —</div>
+        <div class="office-bar-wrap"><div class="office-bar" id="ok-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- CONTROL CENTER -->
+    <div class="control-center">
+      <div class="cc-header">
+        <div class="cc-title">Centro de Control</div>
+        <div class="cc-subtitle">Rendimiento comparativo · <span id="cc-month-label"></span></div>
+      </div>
+      <div class="cc-body">
+        <!-- Left: rankings -->
+        <div class="cc-rankings">
+          <div class="cc-section-title">Oficinas este mes</div>
+          <div class="cc-rank-list" id="cc-rank-list"></div>
+
+          <div class="cc-section-title" style="margin-top:20px">Servicio estrella</div>
+          <div class="cc-star-service" id="cc-star-service">—</div>
+
+          <div class="cc-section-title" style="margin-top:20px">Ingreso estimado total</div>
+          <div class="cc-total-profit" id="cc-total-profit">$0</div>
+          <div class="cc-profit-sub">basado en citas confirmadas</div>
+        </div>
+        <!-- Right: bar chart -->
+        <div class="cc-chart">
+          <div class="cc-section-title">Citas por oficina · últimos 6 meses</div>
+          <div class="cc-bars" id="cc-bars"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: CITAS -->
+  <div id="tab-content-citas" style="display:none">
+
+    <!-- ADMIN VIEW -->
+    <div id="admin-citas-view">
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div><div class="stat-label">Pendientes</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-confirmed" style="color:var(--success)">0</div><div class="stat-label">Confirmadas</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-today" style="color:var(--info)">0</div><div class="stat-label">Hoy</div></div>
+      </div>
+      <div class="filters-bar">
+        <input type="date" class="date-filter" id="filter-date" onchange="renderList()" />
+        <select class="filter-select" id="filter-status" onchange="renderList()">
+          <option value="">Todos los estados</option>
+          <option value="pending">Pendientes</option>
+          <option value="confirmed">Confirmadas</option>
+          <option value="completed">Completadas</option>
+          <option value="cancelled">Canceladas</option>
+        </select>
+        <select class="filter-select" id="filter-location" onchange="renderList()">
+          <option value="">Todas las oficinas</option>
+        </select>
+      </div>
+      <div class="appts-container" id="appts-list"></div>
+    </div>
+
+    <!-- SECRETARY VIEW - Weekly Calendar -->
+    <div id="secretary-citas-view" style="display:none">
+      <div class="cal-toolbar">
+        <button class="cal-nav-btn" onclick="calPrevWeek()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="cal-week-label" id="cal-week-label"></div>
+        <button class="cal-nav-btn" onclick="calNextWeek()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="cal-today-btn" onclick="calGoToday()">Hoy</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+  </div>
+
+  <!-- TAB: CLIENTES -->
+  <div id="tab-content-clientes" style="display:none">
+    <div class="crm-toolbar">
+      <div class="crm-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" id="crm-search" placeholder="Buscar por nombre o teléfono..." class="crm-search" oninput="renderClientes()" />
+      </div>
+      <select class="filter-select" id="crm-filter-service" onchange="renderClientes()" style="max-width:160px">
+        <option value="">Todos los servicios</option>
+        <option value="tax">Impuestos</option>
+        <option value="accounting">Contabilidad</option>
+        <option value="dmv">DMV / Vehículos</option>
+        <option value="insurance">Aseguranza</option>
+        <option value="notary">Notario</option>
+        <option value="general">Asesoría</option>
+      </select>
+      <select class="filter-select" id="crm-filter-location" onchange="renderClientes()" style="max-width:160px">
+        <option value="">Todas las oficinas</option>
+        <option value="belmont">Belmont Ave</option>
+        <option value="ventura">Ventura Blvd</option>
+        <option value="kings">Kings Canyon</option>
+      </select>
+    </div>
+
+    <div class="crm-stats-bar">
+      <span id="crm-count">0 contactos</span>
+      <button class="crm-export-btn" onclick="exportCSV()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9M8 10l-3-3M8 10l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Exportar CSV
+      </button>
+    </div>
+
+    <div class="crm-table-wrap">
+      <table class="crm-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Servicio</th>
+            <th>Oficina</th>
+            <th>Última cita</th>
+          </tr>
+        </thead>
+        <tbody id="crm-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div id="modal" style="display:none" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">¿Confirmar acción?</div>
+    <div class="modal-text"  id="modal-text">Esta acción no se puede deshacer.</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" style="flex:1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" id="modal-confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="sosati-toast"></div>
+
+<script src="sosati-core.js"></script>
+<script>
+
+// ══════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════
+function doLogin() {
+  const pass = document.getElementById("inp-pass").value;
+  const result = SOSATI.auth.login(pass);
+  if (result && result.role === "admin") {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-screen").style.display = "block";
+    initAdmin();
+  } else if (result && result.role === "secretary") {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("office-selector").style.display = "flex";
+  } else {
+    document.getElementById("fg-pass").classList.add("has-error");
+    document.getElementById("inp-pass").value = "";
+    document.getElementById("inp-pass").focus();
+  }
+}
+
+function setSecretaryOffice(office) {
+  SOSATI.auth.setOffice(office);
+  document.getElementById("office-selector").style.display = "none";
+  document.getElementById("admin-screen").style.display = "block";
+  initAdmin();
+}
+
+function doLogout() {
+  SOSATI.auth.logout();
+  location.reload();
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+function initAdmin() {
+  // Apply role-based UI
+  var isSecretary = SOSATI.auth.isSecretary();
+  var office = SOSATI.auth.getOffice();
+
+  if (isSecretary) {
+    var officeNames = { belmont:"Belmont Ave", ventura:"Ventura Blvd", kings:"Kings Canyon" };
+    var officeName = officeNames[office] || office;
+    // Hide Dashboard and Clientes tabs
+    document.getElementById("tab-dashboard").style.display = "none";
+    document.getElementById("tab-clientes").style.display = "none";
+    document.getElementById("tab-requisitos").style.display = "none";
+    // Update header title
+    var titleEl = document.getElementById("header-title");
+    if (titleEl) titleEl.textContent = "Seal Services · " + officeName;
+    // Show secretary badge
+    var badge = document.getElementById("role-badge");
+    if (badge) {
+      badge.textContent = "Secretaria";
+      badge.style.display = "inline-block";
+    }
+    // Show calendar view for secretary, hide admin list view
+    document.getElementById("admin-citas-view").style.display = "none";
+    document.getElementById("secretary-citas-view").style.display = "block";
+    switchTab("citas");
+  }
+
+  buildLocationFilter();
+  setDefaultDate();
+  renderAll();
+  if (SOSATI.auth.isAdmin()) renderDashboard();
+
+  // BroadcastChannel — recibir nuevas citas en tiempo real
+  SOSATI.initBroadcast((msg) => {
+    if (msg.type === "NEW_APPOINTMENT") {
+      renderAll();
+      showToast(`🆕 Nueva cita: ${msg.appointment.name}`, "success");
+      // Flash de nueva cita
+      setTimeout(() => {
+        const card = document.querySelector(`[data-id="${msg.appointment.id}"]`);
+        if (card) {
+          card.classList.add("new-flash");
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 200);
+    }
+    if (msg.type === "STATUS_UPDATE" || msg.type === "DELETED") {
+      renderAll();
+    }
+  });
+
+  // Auto-refresh every 30 seconds
+  setInterval(async function() { 
+    await renderAll(); 
+  }, 30000);
+}
+
+// Verificar sesión al cargar
+document.addEventListener("DOMContentLoaded", () => {
+  if (SOSATI.auth.isAdmin()) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-screen").style.display = "block";
+    initAdmin();
+  } else if (SOSATI.auth.isSecretary()) {
+    var office = SOSATI.auth.getOffice();
+    if (office) {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("admin-screen").style.display = "block";
+      initAdmin();
+    } else {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("office-selector").style.display = "flex";
+    }
+  }
+});
+
+// ══════════════════════════════════════════════════════
+// FILTERS
+// ══════════════════════════════════════════════════════
+function buildLocationFilter() {
+  const sel = document.getElementById("filter-location");
+  SOSATI.config.locations.forEach(l => {
+    const opt = document.createElement("option");
+    opt.value = l.id;
+    opt.textContent = l.label.split("—")[0].trim();
+    sel.appendChild(opt);
+  });
+}
+
+function setDefaultDate() {
+  document.getElementById("filter-date").value = SOSATI.utils.todayStr();
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+async function renderAll() {
+  try {
+    const result = await SOSATI.api.getAppointments();
+    if (result.success && result.appointments) {
+      const appts = result.appointments.map(a => ({
+        id: a.id, name: a.name, phone: a.phone, email: a.email || '',
+        service: a.service, serviceLabel: a.service_label,
+        date: a.date, time: a.time,
+        location: a.location, locationLabel: a.location_label,
+        notes: a.notes || '', status: a.status,
+        createdAt: a.created_at, updatedAt: a.updated_at
+      }));
+      SOSATI.storage.save(appts);
+    }
+  } catch(err) { console.warn('Usando datos locales:', err); }
+  updateStats();
+  if (SOSATI.auth.isSecretary()) {
+    renderCalendar();
+  } else {
+    renderList();
+    if (SOSATI.auth.isAdmin()) updateStats();
+  }
+}
+
+function updateStats() {
+  const all     = SOSATI.storage.getAll();
+  const today   = SOSATI.utils.todayStr();
+  const pending = all.filter(a => a.status === "pending").length;
+  const confirmed = all.filter(a => a.status === "confirmed").length;
+  const todayCount = all.filter(a => a.date === today).length;
+
+  document.getElementById("stat-total").textContent    = all.length;
+  document.getElementById("stat-pending").textContent  = pending;
+  document.getElementById("stat-confirmed").textContent = confirmed;
+  document.getElementById("stat-today").textContent    = todayCount;
+}
+
+function renderList() {
+  let appts = SOSATI.storage.getAll();
+
+  const dateF   = document.getElementById("filter-date").value;
+  const statusF = document.getElementById("filter-status").value;
+  const locF    = document.getElementById("filter-location").value;
+
+  if (dateF)   appts = appts.filter(a => a.date === dateF);
+  if (statusF) appts = appts.filter(a => a.status === statusF);
+  if (locF)    appts = appts.filter(a => a.location === locF);
+
+  // Ordenar por fecha + hora
+  appts.sort((a, b) => {
+    const da = a.date + " " + a.time;
+    const db = b.date + " " + b.time;
+    return da > db ? 1 : -1;
+  });
+
+  const container = document.getElementById("appts-list");
+
+  if (appts.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>No hay citas para mostrar con los filtros seleccionados.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = appts.map(a => buildCard(a)).join("");
+}
+
+function buildCard(a) {
+  const status = SOSATI.utils.statusLabel(a.status);
+  const serviceObj = SOSATI.config.services.find(s => s.id === a.service);
+  const svcIcon = serviceObj?.icon || "🛠️";
+
+  const notesHTML = a.notes
+    ? `<div class="appt-notes-text">📝 ${a.notes}</div>`
+    : "";
+
+  return `
+    <div class="appt-card" data-id="${a.id}">
+      <div class="appt-card-header">
+        <div>
+          <div class="appt-name">${a.name}</div>
+          <div class="appt-id">${a.id}</div>
+        </div>
+        <span class="badge badge-${a.status}">${status.text}</span>
+      </div>
+
+      <div class="appt-meta">
+        <span class="appt-chip"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1 7h14" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v4M11 1v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> ${SOSATI.utils.formatDate(a.date)}</span>
+        <span class="appt-chip"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> ${a.time}</span>
+        <span class="appt-chip">${svcIcon} ${a.serviceLabel}</span>
+        <span class="appt-chip"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4z" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.5"/></svg> ${a.location === "belmont" ? "Belmont" : a.location === "ventura" ? "Ventura" : "Kings Canyon"}</span>
+      </div>
+
+      <div class="appt-meta" style="margin-top:-2px">
+        <span class="appt-chip">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2.5C2 2.5 3 1 4.5 1c.5 0 1 .5 1.5 1.5L7 5c.5 1 0 1.5-.5 2l-.5.5c.5 1 2 2.5 3 3l.5-.5c.5-.5 1-1 2-.5l2.5 1c1 .5 1.5 1 1.5 1.5 0 1.5-1.5 2.5-1.5 2.5C4 16 0 4 2 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> <a href="tel:${a.phone.replace(/\D/g,'')}" class="appt-phone-link">${a.phone}</a>
+        </span>
+        ${a.email ? `<span class="appt-chip"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> ${a.email}</span>` : ""}
+      </div>
+
+      ${notesHTML}
+
+      <div class="appt-actions">
+        ${a.status === "pending" ? `
+          <button class="btn btn-primary btn-sm" onclick="changeStatus('${a.id}','confirmed')">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirmar
+          </button>
+        ` : ""}
+        ${a.status === "confirmed" ? `
+          <button class="btn btn-primary btn-sm" onclick="changeStatus('${a.id}','completed')">
+            ✔️ Completada
+          </button>
+        ` : ""}
+        ${(a.status === "pending" || a.status === "confirmed") ? `
+          <button class="btn btn-secondary btn-sm" onclick="cancelAppt('${a.id}','${a.name}')">
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Cancelar
+          </button>
+        ` : ""}
+        ${a.status === "cancelled" || a.status === "completed" ? `
+          <button class="btn btn-sm" style="background:var(--gray-100);color:var(--gray-600)" onclick="deleteAppt('${a.id}','${a.name}')">
+            🗑 Eliminar
+          </button>
+        ` : ""}
+        <button class="btn btn-sm btn-outline" onclick="callClient('${a.phone}')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2.5C2 2.5 3 1 4.5 1c.5 0 1 .5 1.5 1.5L7 5c.5 1 0 1.5-.5 2l-.5.5c.5 1 2 2.5 3 3l.5-.5c.5-.5 1-1 2-.5l2.5 1c1 .5 1.5 1 1.5 1.5 0 1.5-1.5 2.5-1.5 2.5C4 16 0 4 2 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Llamar
+        </button>
+        <button class="btn btn-sm" style="background:var(--brand-soft);color:var(--brand);border:1.5px solid var(--brand)" onclick="viewDocs('${a.id}','${a.name}')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 1h6l4 4v10H2V1h2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 1v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Documentos
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════════════
+async function changeStatus(id, status) {
+  try { await SOSATI.api.updateStatus(id, status); } catch(err) { console.warn(err); }
+  const all = SOSATI.storage.getAll();
+  const idx = all.findIndex(a => a.id === id);
+  if (idx !== -1) { all[idx].status = status; SOSATI.storage.save(all); }
+  renderAll();
+  const labels = { confirmed: "Cita confirmada", completed: "Marcada como completada" };
+  showToast(labels[status] || "Estado actualizado", "success");
+}
+
+function cancelAppt(id, name) {
+  openModal(
+    "¿Cancelar cita?",
+    `Se marcará la cita de <strong>${name}</strong> como cancelada.`,
+    () => {
+      SOSATI.storage.updateStatus(id, "cancelled");
+      renderAll();
+      showToast("Cita cancelada", "error");
+    }
+  );
+}
+
+function deleteAppt(id, name) {
+  openModal(
+    "¿Eliminar cita?",
+    `Se eliminará permanentemente la cita de <strong>${name}</strong>. Esta acción no se puede deshacer.`,
+    () => {
+      SOSATI.storage.delete(id);
+      renderAll();
+      showToast("Cita eliminada", "info");
+    }
+  );
+}
+
+function callClient(phone) {
+  window.location.href = "tel:" + phone.replace(/\D/g, "");
+}
+
+// ══════════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════════
+let _modalCallback = null;
+
+function openModal(title, text, callback) {
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-text").innerHTML    = text;
+  _modalCallback = callback;
+  document.getElementById("modal").style.display = "flex";
+  document.getElementById("modal-confirm-btn").onclick = () => {
+    closeModal();
+    if (_modalCallback) _modalCallback();
+  };
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  _modalCallback = null;
+}
+
+// Cerrar modal al click fuera
+document.getElementById("modal").addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ══════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════
+function switchTab(tab) {
+  ['dashboard','citas','clientes','requisitos'].forEach(function(t) {
+    var el = document.getElementById('tab-content-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+    var btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'clientes') renderClientes();
+  if (tab === 'requisitos') renderRequisitos();
+}
+
+// ══════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════
+var SERVICE_PRICES = { tax:150, accounting:120, dmv:50, insurance:80, notary:35, general:75 };
+var LOCS = ['belmont','ventura','kings'];
+var LOC_PREFIX = { belmont:'b', ventura:'v', kings:'k' };
+var LOC_NAMES = { belmont:'Belmont Ave', ventura:'Ventura Blvd', kings:'Kings Canyon' };
+var MONTHS_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function renderDashboard() {
+  var all = SOSATI.storage.getAll();
+  var now = new Date();
+  var todayStr = SOSATI.utils.todayStr();
+  var weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  var monthStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+
+  var el = document.getElementById('cc-month-label');
+  if (el) el.textContent = MONTHS_ES[now.getMonth()] + ' ' + now.getFullYear();
+
+  var maxMonth = 1;
+  var officeTotals = {};
+  var serviceCount = {};
+  var totalProfit = 0;
+
+  LOCS.forEach(function(loc) {
+    var p = LOC_PREFIX[loc];
+    var locAll   = all.filter(function(a){ return a.location === loc; });
+    var locToday = locAll.filter(function(a){ return a.date === todayStr; }).length;
+    var locWeek  = locAll.filter(function(a){ return a.date && new Date(a.date+'T00:00:00') >= weekAgo; }).length;
+    var locMonth = locAll.filter(function(a){ return a.date && a.date.startsWith(monthStr); }).length;
+    var locConf  = locAll.filter(function(a){ return a.date && a.date.startsWith(monthStr) && a.status === 'confirmed'; });
+    var profit   = locConf.reduce(function(sum,a){ return sum + (SERVICE_PRICES[a.service] || 75); }, 0);
+
+    var svcMap = {};
+    locAll.forEach(function(a){ if(a.serviceLabel) svcMap[a.serviceLabel] = (svcMap[a.serviceLabel]||0)+1; });
+    var topSvc = Object.entries(svcMap).sort(function(a,b){return b[1]-a[1];})[0];
+
+    var setEl = function(id, val){ var e = document.getElementById(id); if(e) e.textContent = val; };
+    setEl('o'+p+'-today',  locToday);
+    setEl('o'+p+'-week',   locWeek);
+    setEl('o'+p+'-month',  locMonth);
+    setEl('o'+p+'-profit', '$' + profit.toLocaleString());
+    setEl('o'+p+'-top', topSvc ? ('Más solicitado: ' + topSvc[0]) : '— sin citas este mes —');
+
+    officeTotals[loc] = locMonth;
+    totalProfit += profit;
+    if (locMonth > maxMonth) maxMonth = locMonth;
+
+    locAll.forEach(function(a){ if(a.serviceLabel) serviceCount[a.serviceLabel] = (serviceCount[a.serviceLabel]||0)+1; });
+  });
+
+  // Progress bars
+  LOCS.forEach(function(loc) {
+    var bar = document.getElementById('o'+LOC_PREFIX[loc]+'-bar');
+    if (bar) bar.style.width = Math.round(officeTotals[loc]/maxMonth*100) + '%';
+  });
+
+  // Rankings
+  var ranked = Object.entries(officeTotals).sort(function(a,b){return b[1]-a[1];});
+  var medals = ['gold','silver','bronze'];
+  var arrows = [['↑','#16a34a'],['→','#f59e0b'],['↓','#ef4444']];
+  var rankList = document.getElementById('cc-rank-list');
+  if (rankList) {
+    rankList.innerHTML = ranked.map(function(item, i) {
+      return '<div class="cc-rank-item">' +
+        '<div class="cc-rank-pos ' + medals[i] + '">' + (i+1) + '</div>' +
+        '<div class="cc-rank-info">' +
+          '<div class="cc-rank-name">' + LOC_NAMES[item[0]] + '</div>' +
+          '<div class="cc-rank-count">' + item[1] + ' citas este mes</div>' +
+        '</div>' +
+        '<div class="cc-rank-arrow" style="color:' + arrows[i][1] + '">' + arrows[i][0] + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Star service
+  var starEl = document.getElementById('cc-star-service');
+  if (starEl) {
+    var topGlobal = Object.entries(serviceCount).sort(function(a,b){return b[1]-a[1];})[0];
+    starEl.textContent = topGlobal ? (topGlobal[0] + ' (' + topGlobal[1] + ' citas)') : '—';
+  }
+
+  // Total profit
+  var profitEl = document.getElementById('cc-total-profit');
+  if (profitEl) profitEl.textContent = '$' + totalProfit.toLocaleString();
+
+  // Bar chart last 6 months
+  var barsEl = document.getElementById('cc-bars');
+  if (barsEl) {
+    var months = [];
+    for (var i = 5; i >= 0; i--) {
+      var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      months.push({ str: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: MONTHS_ES[d.getMonth()] });
+    }
+    var maxVal = 1;
+    var data = months.map(function(m) {
+      var counts = {};
+      LOCS.forEach(function(loc) {
+        counts[loc] = all.filter(function(a){ return a.location===loc && a.date && a.date.startsWith(m.str); }).length;
+        if (counts[loc] > maxVal) maxVal = counts[loc];
+      });
+      return { label: m.label, counts: counts };
+    });
+    var locColors = { belmont:'loc-b', ventura:'loc-v', kings:'loc-k' };
+    barsEl.innerHTML = data.map(function(m) {
+      var cols = LOCS.map(function(loc) {
+        var h = Math.max(4, Math.round(m.counts[loc]/maxVal*110));
+        return '<div class="cc-bar-col ' + locColors[loc] + '" style="height:' + h + 'px" title="' + LOC_NAMES[loc] + ': ' + m.counts[loc] + '"></div>';
+      }).join('');
+      return '<div class="cc-bar-group"><div class="cc-bar-cols">' + cols + '</div><div class="cc-bar-month">' + m.label + '</div></div>';
+    }).join('') +
+    '<div style="width:100%;margin-top:12px;display:flex;gap:14px;flex-wrap:wrap">' +
+      '<div class="cc-legend-item"><div class="cc-legend-dot" style="background:var(--brand)"></div>Belmont</div>' +
+      '<div class="cc-legend-item"><div class="cc-legend-dot" style="background:#7c3aed"></div>Ventura</div>' +
+      '<div class="cc-legend-item"><div class="cc-legend-dot" style="background:#06b6d4"></div>Kings</div>' +
+    '</div>';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// CRM — CLIENTES
+// ══════════════════════════════════════════════════════
+function renderClientes() {
+  var all = SOSATI.storage.getAll();
+
+  // Deduplicate by phone
+  var seen = {};
+  var clients = [];
+  all.forEach(function(a) {
+    if (!seen[a.phone]) {
+      seen[a.phone] = true;
+      clients.push(a);
+    }
+  });
+
+  // Filters
+  var search  = (document.getElementById('crm-search').value || '').toLowerCase();
+  var svcF    = document.getElementById('crm-filter-service').value;
+  var locF    = document.getElementById('crm-filter-location').value;
+
+  if (search) clients = clients.filter(function(c) {
+    return c.name.toLowerCase().includes(search) || c.phone.includes(search);
+  });
+  if (svcF) clients = clients.filter(function(c){ return c.service === svcF; });
+  if (locF) clients = clients.filter(function(c){ return c.location === locF; });
+
+  // Sort by name
+  clients.sort(function(a,b){ return a.name.localeCompare(b.name); });
+
+  // Update count
+  document.getElementById('crm-count').textContent = clients.length + ' contacto' + (clients.length !== 1 ? 's' : '');
+
+  // Render table
+  var tbody = document.getElementById('crm-tbody');
+  if (!clients.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="crm-empty">No se encontraron contactos</td></tr>';
+    return;
+  }
+
+  var locNames = { belmont: 'Belmont Ave', ventura: 'Ventura Blvd', kings: 'Kings Canyon' };
+
+  tbody.innerHTML = clients.map(function(c) {
+    var email = c.email
+      ? '<span class="crm-email">' + c.email + '</span>'
+      : '<span class="crm-no-email">— sin correo —</span>';
+    var loc = locNames[c.location] || c.location;
+    var date = SOSATI.utils.formatDate(c.date);
+    return '<tr>' +
+      '<td class="crm-name">' + c.name + '</td>' +
+      '<td><a href="tel:' + c.phone.replace(/\D/g,'') + '" style="color:var(--brand);font-weight:600;text-decoration:none">' + c.phone + '</a></td>' +
+      '<td>' + email + '</td>' +
+      '<td>' + (c.serviceLabel || c.service) + '</td>' +
+      '<td>' + loc + '</td>' +
+      '<td>' + date + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function exportCSV() {
+  var all = SOSATI.storage.getAll();
+  var seen = {};
+  var clients = [];
+  all.forEach(function(a) {
+    if (!seen[a.phone]) {
+      seen[a.phone] = true;
+      clients.push(a);
+    }
+  });
+
+  var locNames = { belmont: 'Belmont Ave', ventura: 'Ventura Blvd', kings: 'Kings Canyon' };
+  var headers = ['Nombre','Teléfono','Correo','Servicio','Oficina','Última cita'];
+  var rows = clients.map(function(c) {
+    return [
+      '"' + (c.name||'') + '"',
+      '"' + (c.phone||'') + '"',
+      '"' + (c.email||'') + '"',
+      '"' + (c.serviceLabel||c.service||'') + '"',
+      '"' + (locNames[c.location]||c.location||'') + '"',
+      '"' + SOSATI.utils.formatDate(c.date) + '"'
+    ].join(',');
+  });
+
+  var csv = [headers.join(",")].concat(rows).join("\n");
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'clientes-seal-services-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exportado correctamente', 'success');
+}
+
+
+// ══════════════════════════════════════════════════════
+// CALENDAR VIEW (Secretary)
+// ══════════════════════════════════════════════════════
+var calWeekOffset = 0;
+var DAYS_ES = ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'];
+var MONTHS_CAL = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function calGetWeekDates(offset) {
+  var now = new Date();
+  var day = now.getDay(); // 0=Sun, 1=Mon...
+  // If Sunday, jump to next week automatically
+  var diff = day === 0 ? 1 : 1 - day;
+  var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff + (offset * 7));
+  var days = [];
+  for (var i = 0; i < 5; i++) {
+    var d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function calDateStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function calPrevWeek() { calWeekOffset--; renderCalendar(); }
+function calNextWeek() { calWeekOffset++; renderCalendar(); }
+function calGoToday()  { calWeekOffset = 0; renderCalendar(); }
+
+function renderCalendar() {
+  var days = calGetWeekDates(calWeekOffset);
+  var todayStr = SOSATI.utils.todayStr();
+  var office = SOSATI.auth.getOffice();
+  var all = SOSATI.storage.getAll();
+
+  // Filter by office for secretary
+  if (office) all = all.filter(function(a){ return a.location === office; });
+
+  // Week label
+  var first = days[0], last = days[4];
+  var label = first.getDate() + ' ' + MONTHS_CAL[first.getMonth()];
+  if (first.getMonth() !== last.getMonth()) label += ' — ' + last.getDate() + ' ' + MONTHS_CAL[last.getMonth()];
+  else label += ' — ' + last.getDate();
+  label += ' · ' + first.getFullYear();
+  document.getElementById('cal-week-label').textContent = label;
+
+  // Render columns
+  var grid = document.getElementById('cal-grid');
+  grid.innerHTML = days.map(function(day) {
+    var ds = calDateStr(day);
+    var isToday = ds === todayStr;
+    var dayAppts = all.filter(function(a){ return a.date === ds; })
+      .sort(function(a,b){ return a.time.localeCompare(b.time); });
+
+    var cards = dayAppts.length ? dayAppts.map(function(a) {
+      var statusClass = 'status-' + (a.status || 'pending');
+      return '<div class="cal-appt-card ' + statusClass + '" onclick="openApptDetail(\'' + a.id + '\')">' +
+        '<div class="cal-appt-time">' + a.time + '</div>' +
+        '<div class="cal-appt-name">' + a.name + '</div>' +
+        '<div class="cal-appt-svc">' + (a.serviceLabel || '') + '</div>' +
+      '</div>';
+    }).join('') : '<div class="cal-empty">Sin citas</div>';
+
+    var count = dayAppts.length;
+    var countText = count === 0 ? 'Sin citas' : count + ' cita' + (count !== 1 ? 's' : '');
+
+    return '<div class="cal-col">' +
+      '<div class="cal-col-header' + (isToday ? ' today' : '') + '">' +
+        '<div class="cal-day-name">' + DAYS_ES[day.getDay()] + '</div>' +
+        '<div class="cal-day-num">' + day.getDate() + '</div>' +
+      '</div>' +
+      '<div class="cal-col-body">' + cards + '</div>' +
+      '<div class="cal-col-footer"><div class="cal-col-count">' + countText + '</div></div>' +
+    '</div>';
+  }).join('');
+}
+
+function openApptDetail(id) {
+  var all = SOSATI.storage.getAll();
+  var a = all.find(function(x){ return x.id === id; });
+  if (!a) return;
+  showModal(
+    a.name + ' — ' + a.time,
+    a.serviceLabel + ' · ' + SOSATI.utils.formatDate(a.date),
+    function() { changeStatus(a.id, 'confirmed'); }
+  );
+}
+
+
+// ══════════════════════════════════════════════════════
+// REQUISITOS ADMIN
+// ══════════════════════════════════════════════════════
+var SVC_NAMES = { tax:"Impuestos", accounting:"Contabilidad", dmv:"DMV / Vehiculos", insurance:"Aseguranza", notary:"Notario", general:"Asesoria" };
+
 
 function openAddReq() {
   document.getElementById("req-modal-title").textContent = "Agregar requisito";
