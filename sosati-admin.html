@@ -699,6 +699,7 @@
     <button class="admin-tab active" id="tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
     <button class="admin-tab" id="tab-citas" onclick="switchTab('citas')">Citas</button>
     <button class="admin-tab" id="tab-clientes" onclick="switchTab('clientes')">Clientes</button>
+    <button class="admin-tab" id="tab-requisitos" onclick="switchTab('requisitos')">Requisitos</button>
     <button class="refresh-btn" onclick="renderAll()" title="Actualizar" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.87 4.4 2.2L14 3v4h-4l1.5-1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 
@@ -942,6 +943,7 @@ function initAdmin() {
     // Hide Dashboard and Clientes tabs
     document.getElementById("tab-dashboard").style.display = "none";
     document.getElementById("tab-clientes").style.display = "none";
+    document.getElementById("tab-requisitos").style.display = "none";
     // Update header title
     var titleEl = document.getElementById("header-title");
     if (titleEl) titleEl.textContent = "Seal Services · " + officeName;
@@ -1233,7 +1235,7 @@ document.getElementById("modal").addEventListener("click", (e) => {
 // TABS
 // ══════════════════════════════════════════════════════
 function switchTab(tab) {
-  ['dashboard','citas','clientes'].forEach(function(t) {
+  ['dashboard','citas','clientes','requisitos'].forEach(function(t) {
     var el = document.getElementById('tab-content-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
     var btn = document.getElementById('tab-' + t);
@@ -1241,6 +1243,7 @@ function switchTab(tab) {
   });
   if (tab === 'dashboard') renderDashboard();
   if (tab === 'clientes') renderClientes();
+  if (tab === 'requisitos') renderRequisitos();
 }
 
 // ══════════════════════════════════════════════════════
@@ -1543,6 +1546,112 @@ function openApptDetail(id) {
     a.serviceLabel + ' · ' + SOSATI.utils.formatDate(a.date),
     function() { changeStatus(a.id, 'confirmed'); }
   );
+}
+
+
+// ══════════════════════════════════════════════════════
+// REQUISITOS ADMIN
+// ══════════════════════════════════════════════════════
+var SVC_NAMES = { tax:"Impuestos", accounting:"Contabilidad", dmv:"DMV / Vehículos", insurance:"Aseguranza", notary:"Notario", general:"Asesoría" };
+
+async function renderRequisitos() {
+  var service = document.getElementById("req-filter-service").value;
+  var list = document.getElementById("req-list");
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray-400)">Cargando...</div>';
+
+  try {
+    var resp = await fetch("/api/requirements/" + service);
+    var data = await resp.json();
+    var items = data.requirements || [];
+
+    if (!items.length) {
+      list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray-400)">No hay requisitos para este servicio.<br>Agrega el primero.</div>';
+      return;
+    }
+
+    list.innerHTML = items.map(function(r) {
+      var isReq = r.badge === "Requerido";
+      return '<div class="req-admin-item">' +
+        '<div class="req-admin-dot' + (isReq ? "" : " optional") + '"></div>' +
+        '<div class="req-admin-name">' + r.item + '</div>' +
+        '<div class="req-admin-badge' + (isReq ? "" : " optional") + '">' + r.badge + '</div>' +
+        '<div class="req-admin-actions">' +
+          '<button class="req-icon-btn" onclick="editReq('' + r.id + '','' + r.item.replace(/'/g,"\'") + '','' + r.badge + '')" title="Editar">' +
+            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>' +
+          '</button>' +
+          '<button class="req-icon-btn delete" onclick="deleteReq('' + r.id + '')" title="Borrar">' +
+            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(err) {
+    list.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error cargando requisitos</div>';
+  }
+}
+
+function openAddReq() {
+  document.getElementById("req-modal-title").textContent = "Agregar requisito";
+  document.getElementById("req-edit-id").value = "";
+  document.getElementById("req-item").value = "";
+  document.getElementById("req-badge").value = "Requerido";
+  document.getElementById("req-modal").style.display = "flex";
+}
+
+function editReqById(id) {
+  var r = window._reqItems && window._reqItems[id];
+  if (!r) return;
+  document.getElementById("req-modal-title").textContent = "Editar requisito";
+  document.getElementById("req-edit-id").value = r.id;
+  document.getElementById("req-item").value = r.item;
+  document.getElementById("req-badge").value = r.badge;
+  document.getElementById("req-modal").style.display = "flex";
+}
+
+function closeReqModal() {
+  document.getElementById("req-modal").style.display = "none";
+}
+
+async function saveReq() {
+  var id = document.getElementById("req-edit-id").value;
+  var item = document.getElementById("req-item").value.trim();
+  var badge = document.getElementById("req-badge").value;
+  var service = document.getElementById("req-filter-service").value;
+
+  if (!item) { showToast("Ingresa el nombre del documento", "error"); return; }
+
+  try {
+    var url = id ? "/api/requirements/" + id : "/api/requirements";
+    var method = id ? "PATCH" : "POST";
+    var body = id ? { item, badge } : { service_id: service, item, badge, client_id: "seal-services" };
+
+    var resp = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    var data = await resp.json();
+    if (!data.success) throw new Error(data.error);
+
+    closeReqModal();
+    renderRequisitos();
+    showToast(id ? "Requisito actualizado" : "Requisito agregado", "success");
+  } catch(err) {
+    showToast("Error: " + err.message, "error");
+  }
+}
+
+async function deleteReq(id) {
+  if (!confirm("¿Borrar este requisito?")) return;
+  try {
+    var resp = await fetch("/api/requirements/" + id, { method: "DELETE" });
+    var data = await resp.json();
+    if (!data.success) throw new Error(data.error);
+    renderRequisitos();
+    showToast("Requisito eliminado", "success");
+  } catch(err) {
+    showToast("Error: " + err.message, "error");
+  }
 }
 
 // ══════════════════════════════════════════════════════
