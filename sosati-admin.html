@@ -1472,7 +1472,7 @@ function renderCalendar() {
 
     var cards = dayAppts.length ? dayAppts.map(function(a) {
       var statusClass = 'status-' + (a.status || 'pending');
-      return '<div class="cal-appt-card ' + statusClass + '" onclick="openApptDetail('' + a.id + '')">' +
+      return '<div class="cal-appt-card ' + statusClass + '" onclick="openApptDetail(\'' + a.id + '\')">' +
         '<div class="cal-appt-time">' + a.time + '</div>' +
         '<div class="cal-appt-name">' + a.name + '</div>' +
         '<div class="cal-appt-svc">' + (a.serviceLabel || '') + '</div>' +
