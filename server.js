@@ -398,6 +398,17 @@ app.get("/api/docusign/download/:envelopeId", async (req, res) => {
 });
 
 // ── API: HEALTH CHECK ─────────────────────────────────────
+
+app.get('/api/requirements/:serviceId', async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    const clientId = req.query.client || 'seal-services';
+    const { data, error } = await supabase.from('requirements').select('*').eq('client_id', clientId).eq('service_id', serviceId).order('sort_order', { ascending: true });
+    if (error) throw error;
+    res.json({ success: true, requirements: data });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get("/api/health", async (req, res) => {
   let supabaseStatus = "no configurado";
   let supabaseError = null;
