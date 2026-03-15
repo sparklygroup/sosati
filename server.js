@@ -409,6 +409,33 @@ app.get('/api/requirements/:serviceId', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+app.post('/api/requirements', async (req, res) => {
+  try {
+    const { service_id, item, badge, client_id } = req.body;
+    const { data, error } = await supabase.from('requirements').insert([{ client_id: client_id || 'seal-services', service_id, item, badge: badge || 'Requerido', sort_order: 0 }]).select();
+    if (error) throw error;
+    res.json({ success: true, requirement: data[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.patch('/api/requirements/:id', async (req, res) => {
+  try {
+    const { item, badge } = req.body;
+    const { data, error } = await supabase.from('requirements').update({ item, badge }).eq('id', req.params.id).select();
+    if (error) throw error;
+    res.json({ success: true, requirement: data[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/requirements/:id', async (req, res) => {
+  try {
+    const { error } = await supabase.from('requirements').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get('/api/req-test', async (req, res) => {
   try {
     const { data, error, count } = await supabase.from('requirements').select('*');
