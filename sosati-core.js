@@ -31,6 +31,7 @@ const SOSATI = {
       "4:00 PM",  "5:00 PM",  "6:00 PM"
     ],
     adminPassword: "sosati2024",
+    secretaryPassword: "bella",
     broadcastChannel: "sosati_appointments"
   },
 
@@ -136,15 +137,33 @@ const SOSATI = {
 
   // ── AUTH ADMIN ────────────────────────────────────────────
   auth: {
-    isLoggedIn() { return sessionStorage.getItem("sosati_admin_auth") === "true"; },
+    isLoggedIn() { 
+      return sessionStorage.getItem("sosati_admin_auth") === "true" ||
+             sessionStorage.getItem("sosati_secretary_auth") === "true"; 
+    },
+    isAdmin() { return sessionStorage.getItem("sosati_admin_auth") === "true"; },
+    isSecretary() { return sessionStorage.getItem("sosati_secretary_auth") === "true"; },
+    getOffice() { return sessionStorage.getItem("sosati_secretary_office") || ""; },
     login(password) {
       if (password === SOSATI.config.adminPassword) {
         sessionStorage.setItem("sosati_admin_auth", "true");
-        return true;
+        sessionStorage.removeItem("sosati_secretary_auth");
+        sessionStorage.removeItem("sosati_secretary_office");
+        return { role: "admin" };
+      }
+      if (password === SOSATI.config.secretaryPassword) {
+        sessionStorage.setItem("sosati_secretary_auth", "true");
+        sessionStorage.removeItem("sosati_admin_auth");
+        return { role: "secretary" };
       }
       return false;
     },
-    logout() { sessionStorage.removeItem("sosati_admin_auth"); }
+    setOffice(office) { sessionStorage.setItem("sosati_secretary_office", office); },
+    logout() { 
+      sessionStorage.removeItem("sosati_admin_auth"); 
+      sessionStorage.removeItem("sosati_secretary_auth");
+      sessionStorage.removeItem("sosati_secretary_office");
+    }
   },
 
   // ── HELPERS ───────────────────────────────────────────────

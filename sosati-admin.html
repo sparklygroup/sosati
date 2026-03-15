@@ -627,6 +627,19 @@
   </div>
 </div>
 
+<!-- OFFICE SELECTOR (secretary only) -->
+<div id="office-selector" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:32px 24px;width:90%;max-width:340px;text-align:center">
+    <div style="font-family:var(--font-display);font-size:20px;color:var(--brand);margin-bottom:8px">¿Cuál es tu oficina?</div>
+    <p style="font-size:13px;color:var(--gray-500);margin-bottom:20px">Selecciona tu sucursal para continuar</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" onclick="setSecretaryOffice('belmont')">Belmont Ave</button>
+      <button class="btn btn-secondary" onclick="setSecretaryOffice('ventura')">Ventura Blvd</button>
+      <button class="btn btn-secondary" onclick="setSecretaryOffice('kings')">Kings Canyon</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════════════════════
      ADMIN SCREEN
 ═══════════════════════════════════════════════════════ -->
@@ -835,15 +848,26 @@
 // ══════════════════════════════════════════════════════
 function doLogin() {
   const pass = document.getElementById("inp-pass").value;
-  if (SOSATI.auth.login(pass)) {
-    document.getElementById("login-screen").style.display  = "none";
-    document.getElementById("admin-screen").style.display  = "block";
+  const result = SOSATI.auth.login(pass);
+  if (result && result.role === "admin") {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-screen").style.display = "block";
     initAdmin();
+  } else if (result && result.role === "secretary") {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("office-selector").style.display = "flex";
   } else {
     document.getElementById("fg-pass").classList.add("has-error");
     document.getElementById("inp-pass").value = "";
     document.getElementById("inp-pass").focus();
   }
+}
+
+function setSecretaryOffice(office) {
+  SOSATI.auth.setOffice(office);
+  document.getElementById("office-selector").style.display = "none";
+  document.getElementById("admin-screen").style.display = "block";
+  initAdmin();
 }
 
 function doLogout() {
@@ -855,11 +879,33 @@ function doLogout() {
 // INIT
 // ══════════════════════════════════════════════════════
 function initAdmin() {
-  // Si ya estaba logueado, saltar login
+  // Apply role-based UI
+  var isSecretary = SOSATI.auth.isSecretary();
+  var office = SOSATI.auth.getOffice();
+
+  if (isSecretary) {
+    // Hide Dashboard and Clientes tabs
+    document.getElementById("tab-dashboard").style.display = "none";
+    document.getElementById("tab-clientes").style.display = "none";
+    // Show secretary badge
+    var badge = document.getElementById("role-badge");
+    if (badge) {
+      var officeNames = { belmont:"Belmont Ave", ventura:"Ventura Blvd", kings:"Kings Canyon" };
+      badge.textContent = "Secretaria · " + (officeNames[office] || office);
+      badge.style.display = "inline-block";
+    }
+    // Pre-filter by office
+    switchTab("citas");
+    if (office) {
+      var locFilter = document.getElementById("filter-location");
+      if (locFilter) { locFilter.value = office; }
+    }
+  }
+
   buildLocationFilter();
   setDefaultDate();
   renderAll();
-  renderDashboard();
+  if (SOSATI.auth.isAdmin()) renderDashboard();
 
   // BroadcastChannel — recibir nuevas citas en tiempo real
   SOSATI.initBroadcast((msg) => {
@@ -883,10 +929,20 @@ function initAdmin() {
 
 // Verificar sesión al cargar
 document.addEventListener("DOMContentLoaded", () => {
-  if (SOSATI.auth.isLoggedIn()) {
+  if (SOSATI.auth.isAdmin()) {
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("admin-screen").style.display = "block";
     initAdmin();
+  } else if (SOSATI.auth.isSecretary()) {
+    var office = SOSATI.auth.getOffice();
+    if (office) {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("admin-screen").style.display = "block";
+      initAdmin();
+    } else {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("office-selector").style.display = "flex";
+    }
   }
 });
 
@@ -1324,9 +1380,8 @@ function exportCSV() {
     ].join(',');
   });
 
-  var csv = [headers.join(',')].concat(rows).join('
-');
-  var blob = new Blob(['' + csv], { type: 'text/csv;charset=utf-8;' });
+  var csv = [headers.join(",")].concat(rows).join("\n");
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
