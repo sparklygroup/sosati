@@ -652,6 +652,7 @@
   <div class="admin-tabs">
     <button class="admin-tab active" id="tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
     <button class="admin-tab" id="tab-citas" onclick="switchTab('citas')">Citas</button>
+    <button class="admin-tab" id="tab-clientes" onclick="switchTab('clientes')">Clientes</button>
     <button class="refresh-btn" onclick="renderAll()" title="Actualizar" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.87 4.4 2.2L14 3v4h-4l1.5-1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 
@@ -758,6 +759,55 @@
       </select>
     </div>
     <div class="appts-container" id="appts-list"></div>
+  </div>
+
+  <!-- TAB: CLIENTES -->
+  <div id="tab-content-clientes" style="display:none">
+    <div class="crm-toolbar">
+      <div class="crm-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" id="crm-search" placeholder="Buscar por nombre o teléfono..." class="crm-search" oninput="renderClientes()" />
+      </div>
+      <select class="filter-select" id="crm-filter-service" onchange="renderClientes()" style="max-width:160px">
+        <option value="">Todos los servicios</option>
+        <option value="tax">Impuestos</option>
+        <option value="accounting">Contabilidad</option>
+        <option value="dmv">DMV / Vehículos</option>
+        <option value="insurance">Aseguranza</option>
+        <option value="notary">Notario</option>
+        <option value="general">Asesoría</option>
+      </select>
+      <select class="filter-select" id="crm-filter-location" onchange="renderClientes()" style="max-width:160px">
+        <option value="">Todas las oficinas</option>
+        <option value="belmont">Belmont Ave</option>
+        <option value="ventura">Ventura Blvd</option>
+        <option value="kings">Kings Canyon</option>
+      </select>
+    </div>
+
+    <div class="crm-stats-bar">
+      <span id="crm-count">0 contactos</span>
+      <button class="crm-export-btn" onclick="exportCSV()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9M8 10l-3-3M8 10l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Exportar CSV
+      </button>
+    </div>
+
+    <div class="crm-table-wrap">
+      <table class="crm-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Servicio</th>
+            <th>Oficina</th>
+            <th>Última cita</th>
+          </tr>
+        </thead>
+        <tbody id="crm-tbody"></tbody>
+      </table>
+    </div>
   </div>
 
 </div>
@@ -1062,11 +1112,14 @@ document.getElementById("modal").addEventListener("click", (e) => {
 // TABS
 // ══════════════════════════════════════════════════════
 function switchTab(tab) {
-  ['dashboard','citas'].forEach(function(t) {
-    document.getElementById('tab-content-' + t).style.display = t === tab ? 'block' : 'none';
-    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  ['dashboard','citas','clientes'].forEach(function(t) {
+    var el = document.getElementById('tab-content-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+    var btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
   });
   if (tab === 'dashboard') renderDashboard();
+  if (tab === 'clientes') renderClientes();
 }
 
 // ══════════════════════════════════════════════════════
@@ -1186,6 +1239,101 @@ function renderDashboard() {
       '<div class="cc-legend-item"><div class="cc-legend-dot" style="background:#06b6d4"></div>Kings</div>' +
     '</div>';
   }
+}
+
+// ══════════════════════════════════════════════════════
+// CRM — CLIENTES
+// ══════════════════════════════════════════════════════
+function renderClientes() {
+  var all = SOSATI.storage.getAll();
+
+  // Deduplicate by phone
+  var seen = {};
+  var clients = [];
+  all.forEach(function(a) {
+    if (!seen[a.phone]) {
+      seen[a.phone] = true;
+      clients.push(a);
+    }
+  });
+
+  // Filters
+  var search  = (document.getElementById('crm-search').value || '').toLowerCase();
+  var svcF    = document.getElementById('crm-filter-service').value;
+  var locF    = document.getElementById('crm-filter-location').value;
+
+  if (search) clients = clients.filter(function(c) {
+    return c.name.toLowerCase().includes(search) || c.phone.includes(search);
+  });
+  if (svcF) clients = clients.filter(function(c){ return c.service === svcF; });
+  if (locF) clients = clients.filter(function(c){ return c.location === locF; });
+
+  // Sort by name
+  clients.sort(function(a,b){ return a.name.localeCompare(b.name); });
+
+  // Update count
+  document.getElementById('crm-count').textContent = clients.length + ' contacto' + (clients.length !== 1 ? 's' : '');
+
+  // Render table
+  var tbody = document.getElementById('crm-tbody');
+  if (!clients.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="crm-empty">No se encontraron contactos</td></tr>';
+    return;
+  }
+
+  var locNames = { belmont: 'Belmont Ave', ventura: 'Ventura Blvd', kings: 'Kings Canyon' };
+
+  tbody.innerHTML = clients.map(function(c) {
+    var email = c.email
+      ? '<span class="crm-email">' + c.email + '</span>'
+      : '<span class="crm-no-email">— sin correo —</span>';
+    var loc = locNames[c.location] || c.location;
+    var date = SOSATI.utils.formatDate(c.date);
+    return '<tr>' +
+      '<td class="crm-name">' + c.name + '</td>' +
+      '<td><a href="tel:' + c.phone.replace(/\D/g,'') + '" style="color:var(--brand);font-weight:600;text-decoration:none">' + c.phone + '</a></td>' +
+      '<td>' + email + '</td>' +
+      '<td>' + (c.serviceLabel || c.service) + '</td>' +
+      '<td>' + loc + '</td>' +
+      '<td>' + date + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function exportCSV() {
+  var all = SOSATI.storage.getAll();
+  var seen = {};
+  var clients = [];
+  all.forEach(function(a) {
+    if (!seen[a.phone]) {
+      seen[a.phone] = true;
+      clients.push(a);
+    }
+  });
+
+  var locNames = { belmont: 'Belmont Ave', ventura: 'Ventura Blvd', kings: 'Kings Canyon' };
+  var headers = ['Nombre','Teléfono','Correo','Servicio','Oficina','Última cita'];
+  var rows = clients.map(function(c) {
+    return [
+      '"' + (c.name||'') + '"',
+      '"' + (c.phone||'') + '"',
+      '"' + (c.email||'') + '"',
+      '"' + (c.serviceLabel||c.service||'') + '"',
+      '"' + (locNames[c.location]||c.location||'') + '"',
+      '"' + SOSATI.utils.formatDate(c.date) + '"'
+    ].join(',');
+  });
+
+  var csv = [headers.join(',')].concat(rows).join('
+');
+  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'clientes-seal-services-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exportado correctamente', 'success');
 }
 
 // ══════════════════════════════════════════════════════
