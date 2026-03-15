@@ -107,6 +107,7 @@ const SOSATI = {
     // Guardar en localStorage como cache inmediato
     this.storage.addLocal(appt);
     sessionStorage.setItem("sosati_last_appt", JSON.stringify(appt));
+      localStorage.setItem("sosati_last_appt", JSON.stringify(appt));
 
     // Guardar en Supabase (en background)
     try {
