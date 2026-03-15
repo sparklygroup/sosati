@@ -1582,10 +1582,10 @@ async function renderRequisitos() {
       html += "<div class='req-admin-name'>" + r.item + "</div>";
       html += "<div class='" + badgeCls + "'>" + r.badge + "</div>";
       html += "<div class='req-admin-actions'>";
-     html += "<button class='req-icon-btn' data-id='" + r.id + "' onclick='editReqById(this.dataset.id)' title='Editar'>";
+      html += "<button class='req-icon-btn' data-id='" + r.id + "' onclick='editReqById(this.getAttribute("data-id"))' title='Editar'>";
       html += "<svg width='14' height='14' viewBox='0 0 16 16' fill='none'><path d='M11 2l3 3-8 8H3v-3l8-8z' stroke='currentColor' stroke-width='1.5' stroke-linejoin='round'/></svg>";
       html += "</button>";
-      hthtml += "<button class='req-icon-btn delete' data-id='" + r.id + "' onclick='deleteReq(this.dataset.id)' title='Borrar'>";
+      html += "<button class='req-icon-btn delete' data-id='" + r.id + "' onclick='deleteReq(this.getAttribute("data-id"))' title='Borrar'>";
       html += "<svg width='14' height='14' viewBox='0 0 16 16' fill='none'><path d='M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>";
       html += "</button>";
       html += "</div></div>";
@@ -1949,32 +1949,7 @@ async function downloadSigned() {
 }
 </script>
 </body>
-</html>    // Store items for editing
-    window._reqItems = {};
-    items.forEach(function(r){ window._reqItems[r.id] = r; });
-
-    list.innerHTML = items.map(function(r) {
-      var isReq = r.badge === "Requerido";
-      var dotCls = isReq ? "req-admin-dot" : "req-admin-dot optional";
-      var badgeCls = isReq ? "req-admin-badge" : "req-admin-badge optional";
-      var div = document.createElement("div");
-      div.className = "req-admin-item";
-      div.innerHTML = [
-        '<div class="' + dotCls + '"></div>',
-        '<div class="req-admin-name">' + r.item + '</div>',
-        '<div class="' + badgeCls + '">' + r.badge + '</div>',
-        '<div class="req-admin-actions">',
-          '<button class="req-icon-btn" data-id="' + r.id + '" onclick="editReqById(this.getAttribute('data-id'))" title="Editar">',
-            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
-          '</button>',
-          '<button class="req-icon-btn delete" data-id="' + r.id + '" onclick="deleteReq(this.getAttribute('data-id'))" title="Borrar">',
-            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-          '</button>',
-        '</div>'
-      ].join('');
-      return div.outerHTML;
-    }).join('');
-<html lang="es">
+</html><html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
