@@ -687,30 +687,37 @@
     }, "image/jpeg", 0.9);
   }
 
-  // Docs Modal
-  var docsData = {
-    tax:        [["ID / Licencia","Requerido"],["W-2 o W-9","Requerido"],["Formas de impuestos","Requerido"],["ITIN (si aplica)","Opcional"]],
-    accounting: [["ID / Licencia","Requerido"],["Estados de cuenta","Requerido"],["Registros financieros","Requerido"]],
-    dmv:        [["ID / Licencia","Requerido"],["Título del vehículo","Requerido"],["Prueba de seguro","Requerido"],["Smog Check","Según año"],["Placas actuales","Renovación"]],
-    insurance:  [["ID / Licencia","Requerido"],["Seguro actual","Requerido"],["Título del vehículo","Seguro auto"],["Info de propiedad","Seguro hogar"]],
-    notary:     [["ID / Licencia vigente","Requerido"],["Documento a notarizar","Requerido"],["ID de testigos","Si aplica"]],
-    general:    [["ID / Licencia","Requerido"],["Documentos relacionados","Si aplica"]]
-  };
-
+  // Docs Modal - loads from Supabase
   function openDocsModal() {
     var service = currentAppt ? currentAppt.service : "general";
-    var docs = docsData[service] || docsData.general;
-    var html = docs.map(function(d) {
-      var badgeColor = d[1] === "Requerido" ? "#fef3c7;color:#b45309" : "#f3f4f6;color:#6b7280";
-      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f4f6">' +
-        '<div style="width:8px;height:8px;border-radius:50%;background:' + (d[1]==="Requerido"?"var(--brand)":"#d1d5db") + ';flex-shrink:0"></div>' +
-        '<div style="flex:1;font-size:14px;font-weight:600;color:#1f2937">' + d[0] + '</div>' +
-        '<div style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:' + badgeColor + '">' + d[1] + '</div>' +
-      '</div>';
-    }).join('');
-    document.getElementById("docs-modal-content").innerHTML = html;
     document.getElementById("docs-modal").classList.add("open");
     document.body.style.overflow = "hidden";
+    document.getElementById("docs-modal-content").innerHTML = '<div style="text-align:center;padding:24px;color:#9ca3af">Cargando...</div>';
+
+    fetch("/api/requirements/" + service)
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var docs = data.requirements || [];
+        if (!docs.length) {
+          document.getElementById("docs-modal-content").innerHTML = '<p style="color:#9ca3af;text-align:center;padding:20px">Sin requisitos configurados</p>';
+          return;
+        }
+        var html = docs.map(function(d) {
+          var isReq = d.badge === "Requerido";
+          var dotColor = isReq ? "var(--brand)" : "#d1d5db";
+          var badgeBg = isReq ? "#fef3c7" : "#f3f4f6";
+          var badgeColor = isReq ? "#b45309" : "#6b7280";
+          return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f4f6">' +
+            '<div style="width:8px;height:8px;border-radius:50%;background:' + dotColor + ';flex-shrink:0"></div>' +
+            '<div style="flex:1;font-size:14px;font-weight:600;color:#1f2937">' + d.item + '</div>' +
+            '<div style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:' + badgeBg + ';color:' + badgeColor + '">' + d.badge + '</div>' +
+          '</div>';
+        }).join('');
+        document.getElementById("docs-modal-content").innerHTML = html;
+      })
+      .catch(function() {
+        document.getElementById("docs-modal-content").innerHTML = '<p style="color:#ef4444;text-align:center;padding:20px">Error cargando requisitos</p>';
+      });
   }
 
   function closeDocsModal() {

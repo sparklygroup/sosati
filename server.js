@@ -398,15 +398,6 @@ app.get("/api/docusign/download/:envelopeId", async (req, res) => {
 });
 
 // ── API: HEALTH CHECK ─────────────────────────────────────
-app.get("/api/test-supabase", async (req, res) => {
-  try {
-    const { data, error } = await supabase.from("appointments").select("count").limit(1);
-    res.json({ ok: true, data, error });
-  } catch (err) {
-    res.json({ ok: false, msg: err.message });
-  }
-});
-
 app.get("/api/health", async (req, res) => {
   let supabaseStatus = "no configurado";
   let supabaseError = null;
