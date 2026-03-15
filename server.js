@@ -409,6 +409,13 @@ app.get('/api/requirements/:serviceId', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/api/req-test', async (req, res) => {
+  try {
+    const { data, error, count } = await supabase.from('requirements').select('*');
+    res.json({ count: data ? data.length : 0, error, sample: data ? data[0] : null });
+  } catch(err) { res.json({ err: err.message }); }
+});
+
 app.get("/api/health", async (req, res) => {
   let supabaseStatus = "no configurado";
   let supabaseError = null;
