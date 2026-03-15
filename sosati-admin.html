@@ -605,9 +605,6 @@
       align-items: center;
       gap: 12px;
       border-bottom: 1px solid var(--gray-100);
-      position: sticky;
-      top: 105px;
-      z-index: 88;
     }
     .cal-week-label { flex:1; text-align:center; font-size:14px; font-weight:700; color:var(--brand); font-family:var(--font-display); }
     .cal-nav-btn { background:var(--brand-soft); color:var(--brand); border:none; border-radius:8px; padding:7px 10px; cursor:pointer; display:flex; align-items:center; transition:var(--transition); }
@@ -616,7 +613,7 @@
     .cal-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0; padding:0 0 40px; overflow-x:auto; }
     .cal-col { border-right:1px solid var(--gray-100); min-width:100px; }
     .cal-col:last-child { border-right:none; }
-    .cal-col-header { padding:10px 8px 8px; text-align:center; background:var(--white); border-bottom:2px solid var(--gray-100); position:sticky; top:155px; z-index:10; }
+    .cal-col-header { padding:10px 8px 8px; text-align:center; background:var(--white); border-bottom:2px solid var(--gray-100); }
     .cal-col-header.today .cal-day-num { background:var(--brand); color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:16px; }
     .cal-day-name { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--gray-400); }
     .cal-day-num { font-size:20px; font-weight:700; color:var(--brand); font-family:var(--font-display); line-height:1.2; }
@@ -965,9 +962,6 @@ function initAdmin() {
   renderAll();
   if (SOSATI.auth.isAdmin()) renderDashboard();
 
-  // Auto-refresh every 30 seconds
-  setInterval(function() { renderAll(); }, 30000);
-
   // BroadcastChannel — recibir nuevas citas en tiempo real
   SOSATI.initBroadcast((msg) => {
     if (msg.type === "NEW_APPOINTMENT") {
@@ -986,6 +980,9 @@ function initAdmin() {
       renderAll();
     }
   });
+
+  // Auto-refresh every 30 seconds
+  setInterval(function() { renderAll(); }, 30000);
 }
 
 // Verificar sesión al cargar
@@ -1466,14 +1463,13 @@ var MONTHS_CAL = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','N
 
 function calGetWeekDates(offset) {
   var now = new Date();
-  var day = now.getDay(); // 0=Sun
-  var monday = new Date(now);
-  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1) + (offset * 7));
-  monday.setHours(0,0,0,0);
+  var day = now.getDay(); // 0=Sun, 1=Mon...
+  // Get Monday of current week
+  var diff = day === 0 ? -6 : 1 - day;
+  var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff + (offset * 7));
   var days = [];
   for (var i = 0; i < 5; i++) {
-    var d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+    var d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
     days.push(d);
   }
   return days;
