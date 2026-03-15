@@ -1326,7 +1326,7 @@ function exportCSV() {
 
   var csv = [headers.join(',')].concat(rows).join('
 ');
-  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  var blob = new Blob(['' + csv], { type: 'text/csv;charset=utf-8;' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
