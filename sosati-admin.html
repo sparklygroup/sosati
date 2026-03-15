@@ -884,14 +884,18 @@ function initAdmin() {
   var office = SOSATI.auth.getOffice();
 
   if (isSecretary) {
+    var officeNames = { belmont:"Belmont Ave", ventura:"Ventura Blvd", kings:"Kings Canyon" };
+    var officeName = officeNames[office] || office;
     // Hide Dashboard and Clientes tabs
     document.getElementById("tab-dashboard").style.display = "none";
     document.getElementById("tab-clientes").style.display = "none";
+    // Update header title
+    var titleEl = document.getElementById("header-title");
+    if (titleEl) titleEl.textContent = "Seal Services · " + officeName;
     // Show secretary badge
     var badge = document.getElementById("role-badge");
     if (badge) {
-      var officeNames = { belmont:"Belmont Ave", ventura:"Ventura Blvd", kings:"Kings Canyon" };
-      badge.textContent = "Secretaria · " + (officeNames[office] || office);
+      badge.textContent = "Secretaria";
       badge.style.display = "inline-block";
     }
     // Pre-filter by office
