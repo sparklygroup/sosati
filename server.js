@@ -53,6 +53,9 @@ app.use(express.static(path.join(__dirname), {
   }
 }));
 
+// Serve static assets under /seal-services/ path too
+app.use('/seal-services', express.static(path.join(__dirname)));
+
 // ── RUTAS HTML ────────────────────────────────────────────
 // ── LEGACY ROUTES (redirect to /seal-services) ──────────
 app.get("/",            (req, res) => res.redirect("/seal-services"));
