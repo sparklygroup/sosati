@@ -752,26 +752,46 @@
 
   <!-- TAB: CITAS -->
   <div id="tab-content-citas" style="display:none">
-    <div class="stats-bar">
-      <div class="stat-item"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
-      <div class="stat-item"><div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div><div class="stat-label">Pendientes</div></div>
-      <div class="stat-item"><div class="stat-num" id="stat-confirmed" style="color:var(--success)">0</div><div class="stat-label">Confirmadas</div></div>
-      <div class="stat-item"><div class="stat-num" id="stat-today" style="color:var(--info)">0</div><div class="stat-label">Hoy</div></div>
+
+    <!-- ADMIN VIEW -->
+    <div id="admin-citas-view">
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div><div class="stat-label">Pendientes</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-confirmed" style="color:var(--success)">0</div><div class="stat-label">Confirmadas</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-today" style="color:var(--info)">0</div><div class="stat-label">Hoy</div></div>
+      </div>
+      <div class="filters-bar">
+        <input type="date" class="date-filter" id="filter-date" onchange="renderList()" />
+        <select class="filter-select" id="filter-status" onchange="renderList()">
+          <option value="">Todos los estados</option>
+          <option value="pending">Pendientes</option>
+          <option value="confirmed">Confirmadas</option>
+          <option value="completed">Completadas</option>
+          <option value="cancelled">Canceladas</option>
+        </select>
+        <select class="filter-select" id="filter-location" onchange="renderList()">
+          <option value="">Todas las oficinas</option>
+        </select>
+      </div>
+      <div class="appts-container" id="appts-list"></div>
     </div>
-    <div class="filters-bar">
-      <input type="date" class="date-filter" id="filter-date" onchange="renderList()" />
-      <select class="filter-select" id="filter-status" onchange="renderList()">
-        <option value="">Todos los estados</option>
-        <option value="pending">Pendientes</option>
-        <option value="confirmed">Confirmadas</option>
-        <option value="completed">Completadas</option>
-        <option value="cancelled">Canceladas</option>
-      </select>
-      <select class="filter-select" id="filter-location" onchange="renderList()">
-        <option value="">Todas las oficinas</option>
-      </select>
+
+    <!-- SECRETARY VIEW - Weekly Calendar -->
+    <div id="secretary-citas-view" style="display:none">
+      <div class="cal-toolbar">
+        <button class="cal-nav-btn" onclick="calPrevWeek()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="cal-week-label" id="cal-week-label"></div>
+        <button class="cal-nav-btn" onclick="calNextWeek()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="cal-today-btn" onclick="calGoToday()">Hoy</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
     </div>
-    <div class="appts-container" id="appts-list"></div>
+
   </div>
 
   <!-- TAB: CLIENTES -->
@@ -898,12 +918,11 @@ function initAdmin() {
       badge.textContent = "Secretaria";
       badge.style.display = "inline-block";
     }
-    // Pre-filter by office
+    // Show calendar view for secretary, hide admin list view
+    document.getElementById("admin-citas-view").style.display = "none";
+    document.getElementById("secretary-citas-view").style.display = "block";
     switchTab("citas");
-    if (office) {
-      var locFilter = document.getElementById("filter-location");
-      if (locFilter) { locFilter.value = office; }
-    }
+    renderCalendar();
   }
 
   buildLocationFilter();
@@ -1393,6 +1412,96 @@ function exportCSV() {
   a.click();
   URL.revokeObjectURL(url);
   showToast('CSV exportado correctamente', 'success');
+}
+
+
+// ══════════════════════════════════════════════════════
+// CALENDAR VIEW (Secretary)
+// ══════════════════════════════════════════════════════
+var calWeekOffset = 0;
+var DAYS_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+var MONTHS_CAL = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function calGetWeekDates(offset) {
+  var now = new Date();
+  var day = now.getDay(); // 0=Sun
+  var monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1) + (offset * 7));
+  monday.setHours(0,0,0,0);
+  var days = [];
+  for (var i = 0; i < 5; i++) {
+    var d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function calDateStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function calPrevWeek() { calWeekOffset--; renderCalendar(); }
+function calNextWeek() { calWeekOffset++; renderCalendar(); }
+function calGoToday()  { calWeekOffset = 0; renderCalendar(); }
+
+function renderCalendar() {
+  var days = calGetWeekDates(calWeekOffset);
+  var todayStr = SOSATI.utils.todayStr();
+  var office = SOSATI.auth.getOffice();
+  var all = SOSATI.storage.getAll();
+
+  // Filter by office for secretary
+  if (office) all = all.filter(function(a){ return a.location === office; });
+
+  // Week label
+  var first = days[0], last = days[4];
+  var label = first.getDate() + ' ' + MONTHS_CAL[first.getMonth()];
+  if (first.getMonth() !== last.getMonth()) label += ' — ' + last.getDate() + ' ' + MONTHS_CAL[last.getMonth()];
+  else label += ' — ' + last.getDate();
+  label += ' · ' + first.getFullYear();
+  document.getElementById('cal-week-label').textContent = label;
+
+  // Render columns
+  var grid = document.getElementById('cal-grid');
+  grid.innerHTML = days.map(function(day) {
+    var ds = calDateStr(day);
+    var isToday = ds === todayStr;
+    var dayAppts = all.filter(function(a){ return a.date === ds; })
+      .sort(function(a,b){ return a.time.localeCompare(b.time); });
+
+    var cards = dayAppts.length ? dayAppts.map(function(a) {
+      var statusClass = 'status-' + (a.status || 'pending');
+      return '<div class="cal-appt-card ' + statusClass + '" onclick="openApptDetail('' + a.id + '')">' +
+        '<div class="cal-appt-time">' + a.time + '</div>' +
+        '<div class="cal-appt-name">' + a.name + '</div>' +
+        '<div class="cal-appt-svc">' + (a.serviceLabel || '') + '</div>' +
+      '</div>';
+    }).join('') : '<div class="cal-empty">Sin citas</div>';
+
+    var count = dayAppts.length;
+    var countText = count === 0 ? 'Sin citas' : count + ' cita' + (count !== 1 ? 's' : '');
+
+    return '<div class="cal-col">' +
+      '<div class="cal-col-header' + (isToday ? ' today' : '') + '">' +
+        '<div class="cal-day-name">' + DAYS_ES[day.getDay()] + '</div>' +
+        '<div class="cal-day-num">' + day.getDate() + '</div>' +
+      '</div>' +
+      '<div class="cal-col-body">' + cards + '</div>' +
+      '<div class="cal-col-footer"><div class="cal-col-count">' + countText + '</div></div>' +
+    '</div>';
+  }).join('');
+}
+
+function openApptDetail(id) {
+  var all = SOSATI.storage.getAll();
+  var a = all.find(function(x){ return x.id === id; });
+  if (!a) return;
+  showModal(
+    a.name + ' — ' + a.time,
+    a.serviceLabel + ' · ' + SOSATI.utils.formatDate(a.date),
+    function() { changeStatus(a.id, 'confirmed'); }
+  );
 }
 
 // ══════════════════════════════════════════════════════
