@@ -54,10 +54,17 @@ app.use(express.static(path.join(__dirname), {
 }));
 
 // ── RUTAS HTML ────────────────────────────────────────────
-app.get("/",            (req, res) => res.sendFile(path.join(__dirname, "sosati-appointment.html")));
-app.get("/appointment", (req, res) => res.sendFile(path.join(__dirname, "sosati-appointment.html")));
-app.get("/confirm",     (req, res) => res.sendFile(path.join(__dirname, "sosati-confirm.html")));
-app.get("/admin",       (req, res) => res.sendFile(path.join(__dirname, "sosati-admin.html")));
+// ── LEGACY ROUTES (redirect to /seal-services) ──────────
+app.get("/",            (req, res) => res.redirect("/seal-services"));
+app.get("/appointment", (req, res) => res.redirect("/seal-services"));
+app.get("/confirm",     (req, res) => res.redirect("/seal-services/confirm"));
+app.get("/admin",       (req, res) => res.redirect("/seal-services/admin"));
+
+// ── SEAL SERVICES ROUTES ─────────────────────────────────
+app.get("/seal-services",           (req, res) => res.sendFile(path.join(__dirname, "sosati-appointment.html")));
+app.get("/seal-services/confirm",   (req, res) => res.sendFile(path.join(__dirname, "sosati-confirm.html")));
+app.get("/seal-services/admin",     (req, res) => res.sendFile(path.join(__dirname, "sosati-admin.html")));
+app.get("/seal-services/requisitos",(req, res) => res.sendFile(path.join(__dirname, "sosati-requisitos.html")));
 
 // ── API: CREAR CITA ───────────────────────────────────────
 app.post("/api/appointments", async (req, res) => {

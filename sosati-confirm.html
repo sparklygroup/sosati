@@ -472,7 +472,7 @@
         <div class="upload-doclist">
           <div class="doclist-title">Documentos</div>
           <div class="doclist-note">Varían según el trámite</div>
-          <a href="sosati-requisitos.html" class="doclist-reqlink">Ver todos los requisitos →</a>
+          <a href="/seal-services/requisitos" class="doclist-reqlink">Ver todos los requisitos →</a>
           <ul class="doclist-items" id="doclist-items"></ul>
         </div>
 
@@ -523,7 +523,7 @@
     <a href="tel:5592666555" class="btn btn-primary" style="text-align:center">
       Llamar a la oficina
     </a>
-    <a href="sosati-appointment.html" class="btn" style="background:rgba(255,255,255,0.15);color:white;text-align:center;font-size:14px;padding:14px">
+    <a href="/seal-services" class="btn" style="background:rgba(255,255,255,0.15);color:white;text-align:center;font-size:14px;padding:14px">
       Agendar otra cita
     </a>
   </div>
@@ -544,7 +544,7 @@
 
   document.addEventListener("DOMContentLoaded", function() {
     var raw = sessionStorage.getItem("sosati_last_appt");
-    if (!raw) { window.location.href = "sosati-appointment.html"; return; }
+    if (!raw) { window.location.href = "/seal-services"; return; }
     currentAppt = JSON.parse(raw);
     renderDetails(currentAppt);
     document.getElementById("conf-id").textContent = currentAppt.id;
