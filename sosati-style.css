@@ -59,7 +59,7 @@ body {
 
 /* ── HEADER ─────────────────────────────────────────────── */
 .sosati-header {
-  background: var(--brand);
+  background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 60%, #3d1f8a 100%);
   padding: 18px 24px;
   display: flex;
   align-items: center;
@@ -67,7 +67,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 16px rgba(41,21,110,0.3);
+  box-shadow: 0 4px 20px rgba(41,21,110,0.4);
 }
 
 .sosati-logo {
@@ -112,8 +112,8 @@ body {
   background: var(--white);
   border-radius: var(--radius-lg);
   padding: 28px 24px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--gray-100);
+  box-shadow: 0 2px 12px rgba(41,21,110,0.08);
+  border: 1.5px solid rgba(41,21,110,0.1);
   margin-bottom: 16px;
   animation: fadeUp 0.4s ease both;
 }
