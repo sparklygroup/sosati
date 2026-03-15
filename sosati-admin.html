@@ -982,7 +982,9 @@ function initAdmin() {
   });
 
   // Auto-refresh every 30 seconds
-  setInterval(function() { renderAll(); }, 30000);
+  setInterval(async function() { 
+    await renderAll(); 
+  }, 30000);
 }
 
 // Verificar sesión al cargar
@@ -1044,6 +1046,7 @@ async function renderAll() {
     renderCalendar();
   } else {
     renderList();
+    if (SOSATI.auth.isAdmin()) updateStats();
   }
 }
 
@@ -1464,8 +1467,8 @@ var MONTHS_CAL = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','N
 function calGetWeekDates(offset) {
   var now = new Date();
   var day = now.getDay(); // 0=Sun, 1=Mon...
-  // Get Monday of current week
-  var diff = day === 0 ? -6 : 1 - day;
+  // If Sunday, jump to next week automatically
+  var diff = day === 0 ? 1 : 1 - day;
   var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff + (offset * 7));
   var days = [];
   for (var i = 0; i < 5; i++) {
