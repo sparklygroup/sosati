@@ -14,7 +14,7 @@ const SOSATI = {
     apiBase: "",  // vacío = mismo dominio (Railway)
     locations: [
       { id: "belmont",  label: "Main Office — 3270 E. Belmont Ave, Fresno CA 93702",    tel: "(559) 266-6555" },
-      { id: "ventura",  label: "Ventura Blvd — 3259 E. Ventura Blvd, Fresno CA 93702",  tel: "(559) 493-5911" },
+      { id: "ventura",  label: "Ventura Blvd — 3259 E Cesar Chavez Blvd, Fresno CA 93702",  tel: "(559) 493-5911" },
       { id: "kings",    label: "Kings Canyon — 4244 E Kings Canyon Rd #103, Fresno CA 93702", tel: "(559) 493-5911" }
     ],
     services: [
