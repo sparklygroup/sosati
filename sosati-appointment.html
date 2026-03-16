@@ -106,9 +106,9 @@
 
     <button class="btn btn-primary" id="btn-submit" onclick="submitForm()">Agendar mi cita</button>
     <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:16px">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
-        <button onclick="showCancelForm()" style="width:100%;background:none;border:1.5px solid #ef4444;border-radius:99px;padding:12px 16px;font-family:var(--font-body);font-size:13px;font-weight:600;color:#ef4444;cursor:pointer">Cancelar cita existente</button>
-        <span style="font-size:11px;color:var(--gray-400)">¿Necesitas cancelar una cita previa? Puedes hacerlo aquí sin llamar</span>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+        <button onclick="showCancelForm()" style="width:100%;background:none;border:1.5px solid var(--brand);border-radius:99px;padding:12px 16px;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--brand);cursor:pointer">Cancelar cita existente</button>
+        <span style="font-size:13px;color:var(--gray-600);font-weight:500">Hazlo aquí, sin llamar</span>
       </div>
 
       <!-- Cancel form -->
@@ -118,7 +118,7 @@
         <input class="form-input" type="tel" id="cancel-phone" placeholder="Tu teléfono de registro" style="margin-bottom:12px" />
         <div style="display:flex;gap:8px">
           <button onclick="hideCancelForm()" style="flex:1;background:none;border:1.5px solid var(--gray-200);border-radius:99px;padding:10px;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--gray-500);cursor:pointer">Volver</button>
-          <button onclick="submitCancel()" style="flex:1;background:#ef4444;border:none;border-radius:99px;padding:10px;font-family:var(--font-body);font-size:13px;font-weight:600;color:#fff;cursor:pointer">Confirmar cancelación</button>
+          <button onclick="submitCancel()" style="flex:1;background:var(--brand);border:none;border-radius:99px;padding:10px;font-family:var(--font-body);font-size:13px;font-weight:600;color:#fff;cursor:pointer">Confirmar cancelación</button>
         </div>
       </div>
     </p>
