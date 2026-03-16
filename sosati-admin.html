@@ -1168,7 +1168,7 @@ function initAdmin() {
   // Auto-refresh every 30 seconds
   setInterval(function() {
     renderAll().catch(function(e){ console.warn('Auto-refresh error:', e); });
-  }, 30000);
+  }, 10000);
 }
 
 // Verificar sesión al cargar
