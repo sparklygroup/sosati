@@ -112,13 +112,14 @@
       </div>
 
       <!-- Cancel form -->
-      <div id="cancel-form" style="display:none;background:#fff5f5;border-radius:var(--radius-md);padding:16px;margin-top:8px;border:1px solid #fecaca">
-        <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:10px">Cancelar cita existente</div>
-        <input class="form-input" type="text" id="cancel-id" placeholder="Número de confirmación (APT-XXXXXXXX)" style="margin-bottom:8px" />
-        <input class="form-input" type="tel" id="cancel-phone" placeholder="Tu teléfono de registro" style="margin-bottom:12px" />
+      <div id="cancel-form" style="display:none;background:#f5f3ff;border-radius:var(--radius-md);padding:16px;margin-top:8px;border:1px solid #e5e3f0">
+        <div style="font-size:13px;font-weight:600;color:var(--brand);margin-bottom:6px">Cancelar cita existente</div>
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:12px">Ingresa tu numero de telefono para buscar tu cita</div>
+        <input class="form-input" type="tel" id="cancel-phone" placeholder="(559) 000-0000" style="margin-bottom:8px" />
+        <div id="cancel-result" style="display:none;margin-bottom:12px"></div>
         <div style="display:flex;gap:8px">
           <button onclick="hideCancelForm()" style="flex:1;background:none;border:1.5px solid var(--gray-200);border-radius:99px;padding:10px;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--gray-500);cursor:pointer">Volver</button>
-          <button onclick="submitCancel()" style="flex:1;background:var(--brand);border:none;border-radius:99px;padding:10px;font-family:var(--font-body);font-size:13px;font-weight:600;color:#fff;cursor:pointer">Confirmar cancelación</button>
+          <button onclick="searchAndCancel()" id="cancel-search-btn" style="flex:1;background:var(--brand);border:none;border-radius:99px;padding:10px;font-family:var(--font-body);font-size:13px;font-weight:600;color:#fff;cursor:pointer">Buscar mi cita</button>
         </div>
       </div>
     </p>
