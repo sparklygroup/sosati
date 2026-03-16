@@ -621,7 +621,7 @@
     .cal-appt-card { background:var(--brand-soft); border-left:3px solid var(--brand); border-radius:6px; padding:7px 8px; cursor:pointer; transition:var(--transition); }
     .cal-appt-card:hover { background:var(--brand); color:#fff; }
     .cal-appt-card.status-confirmed { border-left-color:#10b981; background:#ecfdf5; }
-    .cal-appt-card.status-cancelled { border-left-color:#f97316; background:#fff7ed; opacity:0.85; text-decoration:line-through; }
+    .cal-appt-card.status-cancelled { border-left-color:#ef4444; background:#fef2f2; opacity:0.6; }
     .cal-appt-card.status-completed { border-left-color:#6366f1; background:#eef2ff; }
     .cal-appt-time { font-size:10px; color:var(--gray-400); font-weight:600; margin-bottom:2px; }
     .cal-appt-name { font-size:12px; font-weight:700; color:var(--gray-800); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -824,6 +824,12 @@
       <div class="citas-subtabs">
         <button class="citas-subtab active" id="subtab-cal" onclick="switchCitasView('cal')">Semana</button>
         <button class="citas-subtab" id="subtab-list" onclick="switchCitasView('list')">Lista</button>
+        <div class="stats-inline-bar">
+          <span style="color:#6b7280"><span id="stat-total">0</span> total</span>
+          <span style="color:#f59e0b"><span id="stat-pending">0</span> pend.</span>
+          <span style="color:#10b981"><span id="stat-confirmed">0</span> conf.</span>
+          <span style="color:#6366f1"><span id="stat-today">0</span> hoy</span>
+        </div>
       </div>
       <!-- Calendar -->
       <div id="admin-cal-view">
@@ -839,18 +845,7 @@
             <option value="kings">Kings</option>
           </select>
         </div>
-        <div style="display:flex;gap:14px;padding:8px 16px;background:#f9fafb;border-bottom:1px solid #f3f4f6;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#6b7280"><div style="width:10px;height:10px;border-radius:50%;background:var(--brand)"></div>Belmont</div>
-          <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#6b7280"><div style="width:10px;height:10px;border-radius:50%;background:#7c3aed"></div>Ventura</div>
-          <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#6b7280"><div style="width:10px;height:10px;border-radius:50%;background:#06b6d4"></div>Kings Canyon</div>
-        </div>
         <div class="cal-grid" id="cal-grid-admin"></div>
-        <div class="stats-bar" id="cal-stats-bar" style="border-top:2px solid #f3f4f6">
-          <div class="stat-item"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
-          <div class="stat-item"><div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div><div class="stat-label">Pendientes</div></div>
-          <div class="stat-item"><div class="stat-num" id="stat-confirmed" style="color:var(--success)">0</div><div class="stat-label">Confirmadas</div></div>
-          <div class="stat-item"><div class="stat-num" id="stat-today" style="color:var(--info)">0</div><div class="stat-label">Hoy</div></div>
-        </div>
       </div>
       <!-- List -->
       <div id="admin-list-view" style="display:none">
@@ -939,7 +934,7 @@
 
   <!-- TAB: REQUISITOS -->
   <div id="tab-content-requisitos" style="display:none">
-    <div style="background:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee">
+    <div style="background:#fff;padding:14px 16px;display:flex;gap:10px;border-bottom:1px solid #eee">
       <select class="filter-select" id="req-filter-service" onchange="renderRequisitos()" style="max-width:200px">
         <option value="tax">Impuestos</option>
         <option value="accounting">Contabilidad</option>
@@ -948,9 +943,7 @@
         <option value="notary">Notario</option>
         <option value="general">Asesoria</option>
       </select>
-      <div style="margin-left:auto">
-        <button class="crm-export-btn" onclick="openAddReq()">+ Agregar documento</button>
-      </div>
+      <button class="crm-export-btn" onclick="openAddReq()">+ Agregar</button>
     </div>
     <div id="req-list" style="padding:16px;display:flex;flex-direction:column;gap:8px;max-width:700px;margin:0 auto"></div>
   </div>
@@ -1166,9 +1159,9 @@ function initAdmin() {
   });
 
   // Auto-refresh every 30 seconds
-  setInterval(function() {
-    renderAll().catch(function(e){ console.warn('Auto-refresh error:', e); });
-  }, 10000);
+  setInterval(async function() { 
+    await renderAll(); 
+  }, 30000);
 }
 
 // Verificar sesión al cargar
@@ -1230,7 +1223,6 @@ async function renderAll() {
     renderCalendar();
   } else {
     renderList();
-    renderAdminCalendar();
     if (SOSATI.auth.isAdmin()) updateStats();
   }
 }
@@ -1699,7 +1691,7 @@ function renderCalendar() {
 
     var cards = dayAppts.length ? dayAppts.map(function(a) {
       var statusClass = 'status-' + (a.status || 'pending');
-      return '<div class="cal-appt-card ' + statusClass + '" onclick="openApptDetail(this.dataset.id)" data-id="' + a.id + '">'+
+      return '<div class="cal-appt-card ' + statusClass + '" onclick="openApptDetail(\'' + a.id + '\')">' +
         '<div class="cal-appt-time">' + a.time + '</div>' +
         '<div class="cal-appt-name">' + a.name + '</div>' +
         '<div class="cal-appt-svc">' + (a.serviceLabel || '') + '</div>' +
@@ -1724,34 +1716,11 @@ function openApptDetail(id) {
   var all = SOSATI.storage.getAll();
   var a = all.find(function(x){ return x.id === id; });
   if (!a) return;
-
-  var statusLabels = { pending:'Pendiente', confirmed:'Confirmada', completed:'Completada', cancelled:'Cancelada' };
-  var statusColors = { pending:'#f59e0b', confirmed:'#10b981', completed:'#6366f1', cancelled:'#f97316' };
-  var sColor = statusColors[a.status] || '#9ca3af';
-  var sLabel = statusLabels[a.status] || a.status;
-
-  var body = '<div style="font-size:13px;color:#6b7280;margin-bottom:12px">' +
-    '<div style="margin-bottom:6px"><strong style="color:#1f2937">' + a.serviceLabel + '</strong></div>' +
-    '<div>' + SOSATI.utils.formatDate(a.date) + ' · ' + a.time + '</div>' +
-    '<div style="margin-top:6px">' + (a.locationLabel || '') + '</div>' +
-    '<div style="margin-top:8px;display:inline-block;padding:3px 12px;border-radius:99px;background:' + sColor + '20;color:' + sColor + ';font-weight:700;font-size:12px">' + sLabel + '</div>' +
-  '</div>' +
-  '<div style="display:flex;gap:8px;margin-top:4px">' +
-    (a.status !== 'confirmed' ? '<button onclick="changeStatus('' + a.id + '','confirmed');closeModal()" style="flex:1;background:#10b981;border:none;border-radius:8px;padding:10px;color:#fff;font-weight:600;font-size:13px;cursor:pointer">Confirmar</button>' : '') +
-    (a.status !== 'cancelled' ? '<button onclick="cancelAppt('' + a.id + '')" style="flex:1;background:#f97316;border:none;border-radius:8px;padding:10px;color:#fff;font-weight:600;font-size:13px;cursor:pointer">Cancelar cita</button>' : '') +
-  '</div>';
-
-  showModal(a.name + ' · ' + a.time, body, null);
-}
-
-async function cancelAppt(id) {
-  if (!confirm('¿Cancelar esta cita?')) return;
-  await changeStatus(id, 'cancelled');
-  closeModal();
-  showToast('Cita cancelada', 'success');
-  renderAll();
-  if (SOSATI.auth.isAdmin()) renderAdminCalendar();
-  else renderCalendar();
+  showModal(
+    a.name + ' — ' + a.time,
+    a.serviceLabel + ' · ' + SOSATI.utils.formatDate(a.date),
+    function() { changeStatus(a.id, 'confirmed'); }
+  );
 }
 
 // ══════════════════════════════════════════════════════
