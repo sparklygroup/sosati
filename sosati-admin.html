@@ -939,7 +939,7 @@
 
   <!-- TAB: REQUISITOS -->
   <div id="tab-content-requisitos" style="display:none">
-    <div style="background:#fff;padding:14px 16px;display:flex;gap:10px;border-bottom:1px solid #eee">
+    <div style="background:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee">
       <select class="filter-select" id="req-filter-service" onchange="renderRequisitos()" style="max-width:200px">
         <option value="tax">Impuestos</option>
         <option value="accounting">Contabilidad</option>
@@ -948,7 +948,9 @@
         <option value="notary">Notario</option>
         <option value="general">Asesoria</option>
       </select>
-      <button class="crm-export-btn" onclick="openAddReq()">+ Agregar</button>
+      <div style="margin-left:auto">
+        <button class="crm-export-btn" onclick="openAddReq()">+ Agregar documento</button>
+      </div>
     </div>
     <div id="req-list" style="padding:16px;display:flex;flex-direction:column;gap:8px;max-width:700px;margin:0 auto"></div>
   </div>
@@ -1164,8 +1166,8 @@ function initAdmin() {
   });
 
   // Auto-refresh every 30 seconds
-  setInterval(async function() { 
-    await renderAll(); 
+  setInterval(function() {
+    renderAll().catch(function(e){ console.warn('Auto-refresh error:', e); });
   }, 30000);
 }
 
