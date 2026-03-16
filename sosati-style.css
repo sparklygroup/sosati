@@ -65,10 +65,12 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 4px 20px rgba(41,21,110,0.4);
+  border-radius: 0 0 0 0;
 }
 
 .sosati-logo {

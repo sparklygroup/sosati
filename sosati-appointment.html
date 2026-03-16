@@ -33,7 +33,7 @@
   </style>
 </head>
 <body>
-  <header class="sosati-header" style="align-items:flex-start;padding:16px 16px 14px">
+  <header class="sosati-header" style="align-items:flex-start;padding:16px 16px 14px;border-radius:20px 20px 0 0">
     <div class="sosati-logo" style="margin-top:3px;padding:0;overflow:hidden"><img src="https://res.cloudinary.com/dhrb1bzxw/image/upload/v1773551137/seal-services-logo_r3yjqe.jpg" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
     <div style="flex:1;display:flex;flex-direction:column">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -106,7 +106,21 @@
 
     <button class="btn btn-primary" id="btn-submit" onclick="submitForm()">Agendar mi cita</button>
     <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:16px">
-      Necesitas ayuda? Llama al <a href="tel:5592666555" style="color:var(--brand);font-weight:600">(559) 266-6555</a>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <span style="font-size:12px;color:var(--gray-400)">¿Necesitas cancelar una cita previa?</span>
+        <button onclick="showCancelForm()" style="background:none;border:1.5px solid #ef4444;border-radius:99px;padding:6px 16px;font-family:var(--font-body);font-size:12px;font-weight:600;color:#ef4444;cursor:pointer">Cancelar cita</button>
+      </div>
+
+      <!-- Cancel form -->
+      <div id="cancel-form" style="display:none;background:#fff5f5;border-radius:var(--radius-md);padding:16px;margin-top:8px;border:1px solid #fecaca">
+        <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:10px">Cancelar cita existente</div>
+        <input class="form-input" type="text" id="cancel-id" placeholder="Número de confirmación (APT-XXXXXXXX)" style="margin-bottom:8px" />
+        <input class="form-input" type="tel" id="cancel-phone" placeholder="Tu teléfono de registro" style="margin-bottom:12px" />
+        <div style="display:flex;gap:8px">
+          <button onclick="hideCancelForm()" style="flex:1;background:none;border:1.5px solid var(--gray-200);border-radius:99px;padding:10px;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--gray-500);cursor:pointer">Volver</button>
+          <button onclick="submitCancel()" style="flex:1;background:#ef4444;border:none;border-radius:99px;padding:10px;font-family:var(--font-body);font-size:13px;font-weight:600;color:#fff;cursor:pointer">Confirmar cancelación</button>
+        </div>
+      </div>
     </p>
   </div>
   <div id="sosati-toast"></div>
