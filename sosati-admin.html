@@ -824,12 +824,6 @@
       <div class="citas-subtabs">
         <button class="citas-subtab active" id="subtab-cal" onclick="switchCitasView('cal')">Semana</button>
         <button class="citas-subtab" id="subtab-list" onclick="switchCitasView('list')">Lista</button>
-        <div class="stats-inline-bar">
-          <span style="color:#6b7280"><span id="stat-total">0</span> total</span>
-          <span style="color:#f59e0b"><span id="stat-pending">0</span> pend.</span>
-          <span style="color:#10b981"><span id="stat-confirmed">0</span> conf.</span>
-          <span style="color:#6366f1"><span id="stat-today">0</span> hoy</span>
-        </div>
       </div>
       <!-- Calendar -->
       <div id="admin-cal-view">
@@ -845,7 +839,18 @@
             <option value="kings">Kings</option>
           </select>
         </div>
+        <div style="display:flex;gap:14px;padding:8px 16px;background:#f9fafb;border-bottom:1px solid #f3f4f6;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#6b7280"><div style="width:10px;height:10px;border-radius:50%;background:var(--brand)"></div>Belmont</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#6b7280"><div style="width:10px;height:10px;border-radius:50%;background:#7c3aed"></div>Ventura</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#6b7280"><div style="width:10px;height:10px;border-radius:50%;background:#06b6d4"></div>Kings Canyon</div>
+        </div>
         <div class="cal-grid" id="cal-grid-admin"></div>
+        <div class="stats-bar" id="cal-stats-bar" style="border-top:2px solid #f3f4f6">
+          <div class="stat-item"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+          <div class="stat-item"><div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div><div class="stat-label">Pendientes</div></div>
+          <div class="stat-item"><div class="stat-num" id="stat-confirmed" style="color:var(--success)">0</div><div class="stat-label">Confirmadas</div></div>
+          <div class="stat-item"><div class="stat-num" id="stat-today" style="color:var(--info)">0</div><div class="stat-label">Hoy</div></div>
+        </div>
       </div>
       <!-- List -->
       <div id="admin-list-view" style="display:none">
