@@ -1230,6 +1230,7 @@ async function renderAll() {
     renderCalendar();
   } else {
     renderList();
+    renderAdminCalendar();
     if (SOSATI.auth.isAdmin()) updateStats();
   }
 }
