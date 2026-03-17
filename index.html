@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SOSATI — Coming Soon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #29156e;
+      --brand-light: #3d1f8a;
+      --cream: #f7f5f0;
+      --muted: rgba(41,21,110,0.35);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--cream);
+      color: var(--brand);
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Subtle grid texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(41,21,110,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41,21,110,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* Floating orb */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(41,21,110,0.06) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: breathe 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+      50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(52px, 12vw, 96px);
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      color: var(--brand);
+      line-height: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .wordmark span {
+      font-weight: 600;
+    }
+
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: var(--brand);
+      margin: 0 auto 1.5rem;
+      opacity: 0.3;
+      animation: expand 1.4s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes expand {
+      from { width: 0; opacity: 0; }
+      to   { width: 48px; opacity: 0.3; }
+    }
+
+    .tagline {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(11px, 2vw, 13px);
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      animation: fadeUp 1.2s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .coming-soon {
+      margin-top: 3rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(13px, 2.5vw, 15px);
+      font-weight: 400;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--brand);
+      opacity: 0.5;
+      animation: fadeUp 1.2s 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .dots {
+      display: inline-flex;
+      gap: 6px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .dots span {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--brand);
+      opacity: 0.5;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.4); opacity: 0.7; }
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      animation: fadeUp 1.2s 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="wordmark">SO<span>SATI</span></div>
+    <div class="divider"></div>
+    <div class="tagline">Appointment Management Platform</div>
+    <div class="coming-soon">
+      Coming soon
+      <span class="dots">
+        <span></span><span></span><span></span>
+      </span>
+    </div>
+  </div>
+
+  <div class="footer">sosati.app</div>
+
+</body>
+</html>
