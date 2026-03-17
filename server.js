@@ -468,3 +468,8 @@ app.listen(PORT, () => {
   console.log("Supabase:   " + (process.env.SUPABASE_URL ? "Conectado" : "No configurado"));
   console.log("Cloudinary: " + (process.env.CLOUDINARY_CLOUD_NAME ? "Conectado" : "No configurado"));
 });
+
+// ── TEST PAYMENT ROUTE ───────────────────────────────────
+app.get('/test-payment', (req, res) => {
+  res.sendFile(path.join(__dirname, 'test-payment.html'));
+});
