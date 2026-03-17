@@ -3,6 +3,7 @@
 // Con Supabase + Cloudinary
 
 const express    = require("express");
+const stripe     = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const path       = require("path");
 const multer     = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -473,10 +474,6 @@ app.listen(PORT, () => {
 app.get('/test-payment', (req, res) => {
   res.sendFile(path.join(__dirname, 'test-payment.html'));
 });
-
-// ── STRIPE ───────────────────────────────────────────────
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
 app.post('/api/create-payment-intent', async (req, res) => {
   try {
     const { service } = req.body;
