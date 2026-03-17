@@ -621,7 +621,7 @@
     .cal-appt-card { background:var(--brand-soft); border-left:3px solid var(--brand); border-radius:6px; padding:7px 8px; cursor:pointer; transition:var(--transition); }
     .cal-appt-card:hover { background:var(--brand); color:#fff; }
     .cal-appt-card.status-confirmed { border-left-color:#10b981; background:#ecfdf5; }
-    .cal-appt-card.status-cancelled { border-left-color:#ef4444; background:#fef2f2; opacity:0.6; }
+    .cal-appt-card.status-cancelled { border-left-color:#ea580c; background:#fff7ed; border-left-width:4px; }
     .cal-appt-card.status-completed { border-left-color:#6366f1; background:#eef2ff; }
     .cal-appt-time { font-size:10px; color:var(--gray-400); font-weight:600; margin-bottom:2px; }
     .cal-appt-name { font-size:12px; font-weight:700; color:var(--gray-800); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -647,7 +647,7 @@
     .cal-appt-card { background:var(--brand-soft);border-left:3px solid var(--brand);border-radius:6px;padding:7px 8px;cursor:pointer;transition:var(--transition); }
     .cal-appt-card:hover { background:var(--brand);color:#fff; }
     .cal-appt-card.status-confirmed { border-left-color:#10b981;background:#ecfdf5; }
-    .cal-appt-card.status-cancelled { border-left-color:#ef4444;background:#fef2f2;opacity:0.6; }
+    .cal-appt-card.status-cancelled { border-left-color:#ea580c;background:#fff7ed;border-left-width:4px; }
     .cal-appt-card.status-completed { border-left-color:#6366f1;background:#eef2ff; }
     .cal-appt-time { font-size:10px;color:#9ca3af;font-weight:600;margin-bottom:2px; }
     .cal-appt-name { font-size:12px;font-weight:700;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
@@ -1876,8 +1876,11 @@ function renderAdminCalendar() {
       div.style.cssText = 'background:#f5f3ff;border-left:3px solid ' + color + ';border-radius:6px;padding:6px 8px;cursor:pointer;margin-bottom:4px';
       div.dataset.id = a.id;
       div.onclick = function(){ openApptDetail(this.dataset.id); };
-      div.innerHTML = '<div style="font-size:10px;color:#9ca3af;font-weight:600">' + a.time + locLabel + '</div>' +
-        '<div style="font-size:12px;font-weight:700;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + a.name + '</div>' +
+      var isCancelled = a.status === 'cancelled';
+      var cancelTag = isCancelled ? ' <span style="color:#ea580c;font-weight:800;font-size:9px">CANCELADA</span>' : '';
+      div.style.cssText = 'background:' + (isCancelled ? '#fff7ed' : '#f5f3ff') + ';border-left:' + (isCancelled ? '4px' : '3px') + ' solid ' + (isCancelled ? '#ea580c' : color) + ';border-radius:6px;padding:6px 8px;cursor:pointer;margin-bottom:4px';
+      div.innerHTML = '<div style="font-size:10px;color:#9ca3af;font-weight:600">' + a.time + locLabel + cancelTag + '</div>' +
+        '<div style="font-size:12px;font-weight:700;color:' + (isCancelled ? '#ea580c' : '#1f2937') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + (isCancelled ? 'text-decoration:line-through' : '') + '">' + a.name + '</div>' +
         '<div style="font-size:10.5px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (a.serviceLabel || '') + '</div>';
       return div.outerHTML;
     }).join('') : '<div style="font-size:11px;color:#d1d5db;text-align:center;padding:16px 0;font-style:italic">Sin citas</div>';
