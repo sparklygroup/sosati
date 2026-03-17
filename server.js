@@ -473,3 +473,16 @@ app.listen(PORT, () => {
 app.get('/test-payment', (req, res) => {
   res.sendFile(path.join(__dirname, 'test-payment.html'));
 });
+
+// ── STRIPE ───────────────────────────────────────────────
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+app.post('/api/create-payment-intent', async (req, res) => {
+  try {
+    const { service } = req.body;
+    const deposits = { tax:5000, accounting:4000, dmv:2500, insurance:3000, notary:2000, general:2500 };
+    const amount = deposits[service] || 2500;
+    const paymentIntent = await stripe.paymentIntents.create({ amount, currency: 'usd' });
+    res.json({ success: true, clientSecret: paymentIntent.client_secret, amount });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
