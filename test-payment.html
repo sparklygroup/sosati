@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SOSATI — Pago de Depósito</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #29156e;
+      --brand-light: #f0eeff;
+      --success: #10b981;
+      --gray-100: #f3f4f6;
+      --gray-400: #9ca3af;
+      --gray-600: #4b5563;
+      --gray-800: #1f2937;
+      --white: #ffffff;
+      --radius: 16px;
+      --font-display: 'Playfair Display', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: linear-gradient(160deg, #1a0d4a 0%, var(--brand) 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 420px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #1a0d4a, var(--brand));
+      padding: 28px 24px 24px;
+      text-align: center;
+    }
+
+    .card-header .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      margin-bottom: 12px;
+    }
+
+    .card-header h2 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .card-header p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .card-body { padding: 24px; }
+
+    /* Appointment summary */
+    .appt-summary {
+      background: var(--brand-light);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .appt-summary-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--brand);
+      margin-bottom: 10px;
+    }
+
+    .appt-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--gray-600);
+      margin-bottom: 6px;
+    }
+
+    .appt-row:last-child { margin-bottom: 0; }
+
+    .appt-row svg { flex-shrink: 0; color: var(--brand); opacity: 0.6; }
+
+    .appt-row strong { color: var(--gray-800); font-weight: 600; }
+
+    /* Deposit amount */
+    .deposit-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border: 1.5px solid var(--brand-light);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .deposit-label { font-size: 13px; color: var(--gray-600); }
+    .deposit-amount { font-size: 24px; font-weight: 700; color: var(--brand); font-family: var(--font-display); }
+    .deposit-note { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+    /* Stripe Elements */
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-600);
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .stripe-element-wrap {
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 13px 14px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .stripe-element-wrap.focused { border-color: var(--brand); }
+
+    /* Pay button */
+    .pay-btn {
+      width: 100%;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: 99px;
+      padding: 16px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+      margin-top: 4px;
+    }
+
+    .pay-btn:hover { opacity: 0.9; }
+    .pay-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .secure-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--gray-400);
+    }
+
+    /* Success screen */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .success-screen h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--brand);
+      margin-bottom: 8px;
+    }
+
+    .success-screen p {
+      font-size: 13px;
+      color: var(--gray-400);
+      line-height: 1.6;
+    }
+
+    .error-msg {
+      background: #fef2f2;
+      color: #dc2626;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* Service selector for demo */
+    .demo-selector {
+      background: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+    }
+    .demo-selector label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #92400e;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .demo-selector select {
+      width: 100%;
+      border: none;
+      background: none;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--gray-800);
+      outline: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <img class="logo" src="https://res.cloudinary.com/dhrb1bzxw/image/upload/v1773551137/seal-services-logo_r3yjqe.jpg" alt="Seal Services" />
+    <h2>Confirmar depósito</h2>
+    <p>Seal Services · Fresno, CA</p>
+  </div>
+
+  <div class="card-body" id="payment-form-body">
+
+    <!-- Demo selector -->
+    <div class="demo-selector">
+      <label>🧪 Demo — Selecciona servicio</label>
+      <select id="demo-service" onchange="updateDeposit()">
+        <option value="tax">Impuestos — $50</option>
+        <option value="accounting">Contabilidad — $40</option>
+        <option value="dmv">DMV — $25</option>
+        <option value="insurance">Aseguranza — $30</option>
+        <option value="notary">Notario — $20</option>
+        <option value="general">Asesoría — $25</option>
+      </select>
+    </div>
+
+    <!-- Appointment summary -->
+    <div class="appt-summary">
+      <div class="appt-summary-label">Tu cita</div>
+      <div class="appt-row">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 8.5a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4z" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span>Belmont Ave · Fresno, CA</span>
+      </div>
+      <div class="appt-row">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M2 7h12M5 1v4M11 1v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span><strong>Viernes 21 de Marzo · 10:00 AM</strong></span>
+      </div>
+      <div class="appt-row">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 14c0-3 3-5 6.5-5s6.5 2 6.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Juan García</span>
+      </div>
+    </div>
+
+    <!-- Deposit amount -->
+    <div class="deposit-box">
+      <div>
+        <div class="deposit-label">Depósito requerido</div>
+        <div class="deposit-note">Se aplica al total del servicio</div>
+      </div>
+      <div class="deposit-amount" id="deposit-display">$50</div>
+    </div>
+
+    <!-- Card input -->
+    <div class="field-label">Información de pago</div>
+    <div class="stripe-element-wrap" id="card-element-wrap">
+      <div id="card-element"></div>
+    </div>
+
+    <button class="pay-btn" id="pay-btn" onclick="handlePayment()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 8l2 2 3-3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Pagar depósito · <span id="btn-amount">$50</span>
+    </button>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <div class="secure-note">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z" stroke="#9ca3af" stroke-width="1.5"/></svg>
+      Pago seguro procesado por Stripe
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M7 16l6 6 12-12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h3>¡Depósito confirmado!</h3>
+    <p style="margin-top:8px">Tu cita está reservada.<br>Te esperamos el <strong>Viernes 21 de Marzo</strong> a las <strong>10:00 AM</strong>.</p>
+    <div style="margin-top:20px;padding:16px;background:var(--brand-light);border-radius:12px;font-size:12px;color:var(--brand)">
+      Recibirás un recordatorio 24 horas antes de tu cita.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const deposits = { tax:50, accounting:40, dmv:25, insurance:30, notary:20, general:25 };
+
+  // Init Stripe
+  const stripe = Stripe('pk_test_REPLACE_WITH_YOUR_PUBLISHABLE_KEY');
+  const elements = stripe.elements();
+  const cardElement = elements.create('card', {
+    style: {
+      base: {
+        fontFamily: 'DM Sans, sans-serif',
+        fontSize: '14px',
+        color: '#1f2937',
+        '::placeholder': { color: '#9ca3af' }
+      }
+    }
+  });
+  cardElement.mount('#card-element');
+
+  cardElement.on('focus', () => document.getElementById('card-element-wrap').classList.add('focused'));
+  cardElement.on('blur', () => document.getElementById('card-element-wrap').classList.remove('focused'));
+
+  function updateDeposit() {
+    const service = document.getElementById('demo-service').value;
+    const amount = deposits[service];
+    document.getElementById('deposit-display').textContent = '$' + amount;
+    document.getElementById('btn-amount').textContent = '$' + amount;
+  }
+
+  async function handlePayment() {
+    const btn = document.getElementById('pay-btn');
+    const errEl = document.getElementById('error-msg');
+    btn.disabled = true;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="white" stroke-width="1.5" stroke-dasharray="25" stroke-dashoffset="25"><animate attributeName="stroke-dashoffset" values="25;0" dur="0.8s" repeatCount="indefinite"/></circle></svg> Procesando...';
+    errEl.style.display = 'none';
+
+    try {
+      const service = document.getElementById('demo-service').value;
+
+      // Create payment intent
+      const intentResp = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service,
+          appointmentData: {
+            name: 'Juan García',
+            phone: '559 801 7465',
+            date: '2026-03-21',
+            time: '10:00 AM',
+            location: 'belmont'
+          }
+        })
+      });
+
+      const intentData = await intentResp.json();
+      if (!intentData.clientSecret) throw new Error('No se pudo iniciar el pago');
+
+      // Confirm payment
+      const { error, paymentIntent } = await stripe.confirmCardPayment(intentData.clientSecret, {
+        payment_method: { card: cardElement }
+      });
+
+      if (error) throw new Error(error.message);
+
+      // Success
+      document.getElementById('payment-form-body').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+
+    } catch(err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 8l2 2 3-3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Pagar depósito · <span id="btn-amount">$' + deposits[document.getElementById('demo-service').value] + '</span>';
+    }
+  }
+</script>
+</body>
+</html>
