@@ -4,7 +4,6 @@
 
 const express    = require("express");
 const stripe     = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const stripe     = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const path       = require("path");
 const multer     = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -82,6 +81,20 @@ app.get("/seal-services",           (req, res) => res.sendFile(path.join(__dirna
 app.get("/seal-services/confirm",   (req, res) => res.sendFile(path.join(__dirname, "sosati-confirm.html")));
 app.get("/seal-services/admin",     (req, res) => res.sendFile(path.join(__dirname, "sosati-admin.html")));
 app.get("/seal-services/requisitos",(req, res) => res.sendFile(path.join(__dirname, "sosati-requisitos.html")));
+
+// ── TEST PAYMENT ROUTE ───────────────────────────────────
+app.get('/test-payment', (req, res) => {
+  res.sendFile(path.join(__dirname, 'test-payment.html'));
+});
+app.post('/api/create-payment-intent', async (req, res) => {
+  try {
+    const { service } = req.body;
+    const deposits = { tax:5000, accounting:4000, dmv:2500, insurance:3000, notary:2000, general:2500 };
+    const amount = deposits[service] || 2500;
+    const paymentIntent = await stripe.paymentIntents.create({ amount, currency: 'usd' });
+    res.json({ success: true, clientSecret: paymentIntent.client_secret, amount });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
 
 // ── API: CREAR CITA ───────────────────────────────────────
 app.post("/api/appointments", async (req, res) => {
@@ -282,6 +295,7 @@ app.post("/api/docusign/send", async (req, res) => {
         format: fileExt
       });
     }
+
     console.log("Fetching doc from:", fetchUrl.substring(0, 100));
     const docResponse = await fetch(fetchUrl);
     console.log("Doc fetch status:", docResponse.status, "content-type:", docResponse.headers.get("content-type"));
@@ -399,18 +413,17 @@ app.get("/api/docusign/download/:envelopeId", async (req, res) => {
   }
 });
 
-// ── API: HEALTH CHECK ─────────────────────────────────────
-
+// ── API: REQUIREMENTS ─────────────────────────────────────
 app.get('/api/requirements/:serviceId', async (req, res) => {
   try {
     const { serviceId } = req.params;
     const clientId = req.query.client || 'seal-services';
-    console.log('Requirements query:', serviceId, clientId); const { data, error } = await supabase.from('requirements').select('*').eq('client_id', clientId).eq('service_id', serviceId).order('sort_order', { ascending: true });
+    console.log('Requirements query:', serviceId, clientId);
+    const { data, error } = await supabase.from('requirements').select('*').eq('client_id', clientId).eq('service_id', serviceId).order('sort_order', { ascending: true });
     if (error) throw error;
     res.json({ success: true, requirements: data });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
-
 
 app.post('/api/requirements', async (req, res) => {
   try {
@@ -445,6 +458,7 @@ app.get('/api/req-test', async (req, res) => {
   } catch(err) { res.json({ err: err.message }); }
 });
 
+// ── API: HEALTH CHECK ─────────────────────────────────────
 app.get("/api/health", async (req, res) => {
   let supabaseStatus = "no configurado";
   let supabaseError = null;
@@ -453,13 +467,14 @@ app.get("/api/health", async (req, res) => {
     if (error) { supabaseStatus = "error"; supabaseError = error.message; }
     else { supabaseStatus = "ok - " + (data ? data.length : 0) + " rows"; }
   } catch(e) { supabaseStatus = "exception"; supabaseError = e.message; }
-  
+
   res.json({
     status:     "ok",
     service:    "SOSATI",
     supabase:   supabaseStatus,
     supabaseError: supabaseError,
     cloudinary: process.env.CLOUDINARY_CLOUD_NAME ? "conectado" : "no configurado",
+    stripe:     process.env.STRIPE_SECRET_KEY ? "configurado" : "no configurado",
     time:       new Date().toISOString()
   });
 });
@@ -469,18 +484,6 @@ app.listen(PORT, () => {
   console.log("SOSATI corriendo en puerto " + PORT);
   console.log("Supabase:   " + (process.env.SUPABASE_URL ? "Conectado" : "No configurado"));
   console.log("Cloudinary: " + (process.env.CLOUDINARY_CLOUD_NAME ? "Conectado" : "No configurado"));
+  console.log("Stripe:     " + (process.env.STRIPE_SECRET_KEY ? "Configurado" : "No configurado"));
 });
-
-// ── TEST PAYMENT ROUTE ───────────────────────────────────
-app.get('/test-payment', (req, res) => {
-  res.sendFile(path.join(__dirname, 'test-payment.html'));
-});
-app.post('/api/create-payment-intent', async (req, res) => {
-  try {
-    const { service } = req.body;
-    const deposits = { tax:5000, accounting:4000, dmv:2500, insurance:3000, notary:2000, general:2500 };
-    const amount = deposits[service] || 2500;
-    const paymentIntent = await stripe.paymentIntents.create({ amount, currency: 'usd' });
-    res.json({ success: true, clientSecret: paymentIntent.client_secret, amount });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+// deploy Tue Mar 17 16:07:30 PDT 2026

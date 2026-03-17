@@ -326,7 +326,7 @@
   const deposits = { tax:50, accounting:40, dmv:25, insurance:30, notary:20, general:25 };
 
   // Init Stripe
-  const stripe = Stripe('pk_live_51Sig8CBk9wnPoU0kRqk7pG4VNnqYDyG79WX4eROcgd3WD1fLiA6b8wLvFcGZxwWCU39y9VDKdNl0gxl1FNLbZen8004opuiBQ6O');
+  const stripe = Stripe('pk_test_51Sig8CBk9wnPoU0kN3oiiKHG5XBqtF3xKBrFaEndF5DakEUg95O0m1bivbdO1ftxyNP8P5P3mqVK3kqO6UV3OPK900HgMQ7V5G');
   const elements = stripe.elements();
   const cardElement = elements.create('card', {
     style: {
